@@ -6,6 +6,14 @@ from database import Base
 
 ROLES = ("R", "A", "C", "I", "V", "S")
 
+R_SUBCATEGORIES = (
+    "Ausführende Tätigkeit",
+    "Gewährleistung",
+    "Koordination",
+    "Veranlassung",
+    "Mitwirkung",
+)
+
 
 class Function(Base):
     __tablename__ = "functions"
@@ -53,6 +61,7 @@ class FunctionTaskRole(Base):
     function_id: Mapped[int] = mapped_column(Integer, ForeignKey("functions.id"), nullable=False)
     task_id: Mapped[int] = mapped_column(Integer, ForeignKey("tasks.id"), nullable=False)
     role: Mapped[str] = mapped_column(Enum(*ROLES, name="role_enum"), nullable=False)
+    r_subcategory: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     function: Mapped["Function"] = relationship("Function", back_populates="task_roles")
     task: Mapped["Task"] = relationship("Task", back_populates="function_roles")

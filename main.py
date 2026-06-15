@@ -2,6 +2,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import models
@@ -10,6 +11,13 @@ from routers import assignments, documents, functions, tasks
 from models import Function, FunctionTaskRole, Task
 
 app = FastAPI(title="RACI-VS Manager")
+
+with engine.connect() as _conn:
+    try:
+        _conn.execute(text("ALTER TABLE function_task_roles ADD COLUMN r_subcategory VARCHAR(50)"))
+        _conn.commit()
+    except Exception:
+        pass  # column already exists
 
 Base.metadata.create_all(bind=engine)
 

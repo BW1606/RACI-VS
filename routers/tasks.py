@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Function, FunctionTaskRole, Task, ROLES
+from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 templates = Jinja2Templates(directory="templates")
@@ -54,6 +54,7 @@ def task_detail(task_id: int, request: Request, db: Session = Depends(get_db)):
             "all_functions": all_functions,
             "available_functions": available_functions,
             "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
         },
     )
 
@@ -84,6 +85,7 @@ def edit_task(
             "all_functions": all_functions,
             "available_functions": available_functions,
             "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
         },
     )
 

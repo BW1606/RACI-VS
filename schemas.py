@@ -21,3 +21,4 @@ class AssignmentCreate(BaseModel):
     function_id: int
     task_id: int
     role: RoleType
+    r_subcategory: str | None = None

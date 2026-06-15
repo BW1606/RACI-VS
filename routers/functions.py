@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Function, FunctionTaskRole, Task, ROLES
+from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
 
 router = APIRouter(prefix="/functions", tags=["functions"])
 templates = Jinja2Templates(directory="templates")
@@ -25,7 +25,7 @@ def list_functions(request: Request, db: Session = Depends(get_db)):
     all_functions = functions
     return templates.TemplateResponse(
         "functions/list.html",
-        {"request": request, "functions": functions, "all_functions": all_functions, "roles": ROLES},
+        {"request": request, "functions": functions, "all_functions": all_functions, "roles": ROLES, "r_subcategories": R_SUBCATEGORIES},
     )
 
 
@@ -77,6 +77,7 @@ def function_detail(fn_id: int, request: Request, db: Session = Depends(get_db))
             "all_functions": all_functions,
             "available_tasks": available_tasks,
             "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
         },
     )
 
@@ -87,6 +88,7 @@ def assign_function_to_task(
     request: Request,
     task_id: int = Form(...),
     role: str = Form(...),
+    r_subcategory: str | None = Form(None),
     db: Session = Depends(get_db),
 ):
     fn = db.get(Function, fn_id)
@@ -94,6 +96,11 @@ def assign_function_to_task(
         raise HTTPException(status_code=404, detail="Function not found")
     if role not in ROLES:
         raise HTTPException(status_code=400, detail="Invalid role")
+    if role == "R":
+        if not r_subcategory or r_subcategory not in R_SUBCATEGORIES:
+            raise HTTPException(status_code=400, detail="A subcategory is required for role R")
+    else:
+        r_subcategory = None
     existing = (
         db.query(FunctionTaskRole)
         .filter(FunctionTaskRole.function_id == fn_id, FunctionTaskRole.task_id == task_id)
@@ -101,7 +108,7 @@ def assign_function_to_task(
     )
     if existing:
         raise HTTPException(status_code=400, detail="Assignment already exists")
-    assignment = FunctionTaskRole(function_id=fn_id, task_id=task_id, role=role)
+    assignment = FunctionTaskRole(function_id=fn_id, task_id=task_id, role=role, r_subcategory=r_subcategory)
     db.add(assignment)
     db.commit()
     db.refresh(assignment)
@@ -146,6 +153,7 @@ def edit_function(
             "all_functions": all_functions,
             "available_tasks": available_tasks,
             "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
         },
     )
 

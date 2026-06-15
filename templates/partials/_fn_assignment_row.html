@@ -1,6 +1,11 @@
 <tr id="fn-assignment-row-{{ fr.id }}">
   <td><a href="/tasks/{{ fr.task.id }}">{{ fr.task.title }}</a></td>
-  <td><span class="role-badge role-{{ fr.role }}">{{ fr.role }}</span></td>
+  <td>
+    <span class="role-badge role-{{ fr.role }}">{{ fr.role }}</span>
+    {% if fr.role == "R" and fr.r_subcategory %}
+    <span style="font-size:0.8rem;color:var(--pico-muted-color);margin-left:0.3rem">{{ fr.r_subcategory }}</span>
+    {% endif %}
+  </td>
   <td>{{ fr.task.description[:100] }}{% if fr.task.description|length > 100 %}…{% endif %}</td>
   <td>
     <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"

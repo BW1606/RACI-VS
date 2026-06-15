@@ -44,7 +44,7 @@
 <form hx-post="/assignments"
       hx-target="#assignment-tbody"
       hx-swap="beforeend"
-      hx-on::after-request="this.reset(); const e=document.getElementById('no-assignments'); if(e) e.remove()">
+      hx-on::after-request="this.reset(); taskSubcategoryLabel.style.display='none'; taskRoleSubcategory.required=false; const e=document.getElementById('no-assignments'); if(e) e.remove()">
   <input type="hidden" name="task_id" value="{{ task.id }}" />
   <div class="grid">
     <label>Function
@@ -56,7 +56,12 @@
       </select>
     </label>
     <label>Role
-      <select name="role" required>
+      <select name="role" id="task-role-select" required onchange="
+        var sub = document.getElementById('task-subcategory-label');
+        var sel = document.getElementById('task-role-subcategory');
+        if (this.value === 'R') { sub.style.display=''; sel.required=true; }
+        else { sub.style.display='none'; sel.required=false; sel.value=''; }
+      ">
         <option value="">— select —</option>
         {% for r in roles %}
         <option value="{{ r }}">{{ r }}
@@ -68,6 +73,14 @@
           {% elif r == "S" %} — Signator
           {% endif %}
         </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label id="task-subcategory-label" style="display:none">Subcategory
+      <select name="r_subcategory" id="task-role-subcategory">
+        <option value="">— select —</option>
+        {% for s in r_subcategories %}
+        <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
       </select>
     </label>
