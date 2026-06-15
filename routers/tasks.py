@@ -13,9 +13,10 @@ templates = Jinja2Templates(directory="templates")
 @router.get("", response_class=HTMLResponse)
 def list_tasks(request: Request, db: Session = Depends(get_db)):
     tasks = db.query(Task).order_by(Task.title).all()
+    functions = db.query(Function).order_by(Function.name).all()
     return templates.TemplateResponse(
         "tasks/list.html",
-        {"request": request, "tasks": tasks},
+        {"request": request, "tasks": tasks, "functions": functions, "roles": ROLES, "r_subcategories": R_SUBCATEGORIES},
     )
 
 
@@ -24,12 +25,26 @@ def create_task(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
+    function_ids: list[int] = Form(default=[]),
+    roles: list[str] = Form(default=[]),
+    r_subcategories: list[str] = Form(default=[]),
     db: Session = Depends(get_db),
 ):
     if db.query(Task).filter(Task.title == title).first():
         raise HTTPException(status_code=400, detail="Task title already exists")
     task = Task(title=title, description=description)
     db.add(task)
+    db.flush()
+    padded_subcats = list(r_subcategories) + [""] * max(0, len(function_ids) - len(r_subcategories))
+    for fn_id, role, r_sub in zip(function_ids, roles, padded_subcats):
+        if role not in ROLES:
+            raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+        if role == "R":
+            if not r_sub or r_sub not in R_SUBCATEGORIES:
+                raise HTTPException(status_code=400, detail="A subcategory is required for role R")
+        else:
+            r_sub = None
+        db.add(FunctionTaskRole(function_id=fn_id, task_id=task.id, role=role, r_subcategory=r_sub))
     db.commit()
     db.refresh(task)
     return templates.TemplateResponse(

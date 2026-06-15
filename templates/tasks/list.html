@@ -5,16 +5,87 @@
 
 <details open>
   <summary>Add New Task</summary>
-  <form hx-post="/tasks" hx-target="#task-tbody" hx-swap="beforeend" hx-on::after-request="this.reset()">
+  <form hx-post="/tasks" hx-target="#task-tbody" hx-swap="beforeend"
+        hx-on::after-request="if(event.detail.successful){this.reset();document.getElementById('fn-rows-container').innerHTML=''}">
     <label>Title *
       <input type="text" name="title" required placeholder="e.g. Annual Budget Approval" />
     </label>
     <label>Description
       <textarea name="description" rows="2" placeholder="Describe what this task involves…"></textarea>
     </label>
+
+    <p style="margin-bottom:0.25rem"><strong>Function Assignments</strong> <span style="font-weight:normal;color:var(--pico-muted-color)">(optional)</span></p>
+    <div id="fn-rows-container"></div>
+    {% if functions %}
+    <button type="button" class="outline" style="margin-bottom:1rem" onclick="addFunctionRow()">+ Add Function</button>
+    {% endif %}
+
     <button type="submit">Add Task</button>
   </form>
 </details>
+
+<template id="fn-row-template">
+  <div class="fn-assignment-row" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.5rem;align-items:end;margin-bottom:0.5rem">
+    <label style="margin:0">Function
+      <select name="function_ids" required>
+        <option value="">— select —</option>
+        {% for f in functions %}
+        <option value="{{ f.id }}">{{ f.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label style="margin:0">Role
+      <select name="roles" required onchange="onFnRoleChange(this)">
+        <option value="">— select —</option>
+        {% for r in roles %}
+        <option value="{{ r }}">{{ r }}
+          {% if r == "R" %} — Responsible
+          {% elif r == "A" %} — Accountable
+          {% elif r == "C" %} — Consulted
+          {% elif r == "I" %} — Informed
+          {% elif r == "V" %} — Verificator
+          {% elif r == "S" %} — Signator
+          {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="sub-label" style="margin:0;display:none">Subcategory
+      <select name="r_subcategories">
+        <option value="">— select —</option>
+        {% for s in r_subcategories %}
+        <option value="{{ s }}">{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div style="display:flex;align-items:flex-end;padding-bottom:0">
+      <button type="button" class="outline secondary" style="padding:0.4rem 0.7rem" onclick="removeFunctionRow(this)">✕</button>
+    </div>
+  </div>
+</template>
+
+<script>
+function addFunctionRow() {
+  const clone = document.getElementById('fn-row-template').content.cloneNode(true);
+  document.getElementById('fn-rows-container').appendChild(clone);
+}
+function removeFunctionRow(btn) {
+  btn.closest('.fn-assignment-row').remove();
+}
+function onFnRoleChange(select) {
+  const row = select.closest('.fn-assignment-row');
+  const subLabel = row.querySelector('.sub-label');
+  const subSel = row.querySelector('select[name="r_subcategories"]');
+  if (select.value === 'R') {
+    subLabel.style.display = '';
+    subSel.required = true;
+  } else {
+    subLabel.style.display = 'none';
+    subSel.required = false;
+    subSel.value = '';
+  }
+}
+</script>
 
 <table>
   <thead>

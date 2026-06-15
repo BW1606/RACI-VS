@@ -61,11 +61,11 @@ Functions can be deleted from the list. Deleting a function removes all its role
 
 ### 2. Create Tasks
 
-Go to **Tasks** and click **Add New Task**. Enter a title and description. Tasks can be deleted from the list.
+Go to **Tasks** and click **Add New Task**. Enter a title and description. Optionally, click **+ Add Function** to assign one or more functions with their RACI-VS roles directly in the creation form — the same role rules apply (selecting **R** reveals the subcategory dropdown). Add as many rows as needed; remove unwanted ones with **✕**. All assignments are saved atomically with the task. Tasks can be deleted from the list.
 
 ### 3. Assign Roles
 
-Open a function's or task's detail page. Use the **Assign** form to link a function to a task with one of the six roles:
+Additional roles can be assigned after creation from a function's or task's detail page. Use the **Assign** form to link a function to a task with one of the six roles:
 
 | Role | Name | Meaning |
 |---|---|---|
