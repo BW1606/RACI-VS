@@ -13,12 +13,36 @@
     <nav class="top-nav">
       <ul>
         <li><strong>RACI-VS Manager</strong></li>
+        <li>
+          <details class="org-switcher">
+            <summary>{{ current_org.name if current_org else '—' }}</summary>
+            <ul>
+              {% for org in all_orgs %}
+              <li>
+                {% if org.id == current_org.id %}
+                <span class="org-active">&#10003; {{ org.name }}</span>
+                {% else %}
+                <a href="/organisations/switch/{{ org.id }}">{{ org.name }}</a>
+                {% endif %}
+              </li>
+              {% endfor %}
+              <li><hr style="margin:0.4rem 0" /></li>
+              <li>
+                <form method="post" action="/organisations" class="org-create-form">
+                  <input name="name" placeholder="New organisation…" required />
+                  <button type="submit">+</button>
+                </form>
+              </li>
+            </ul>
+          </details>
+        </li>
       </ul>
       <ul>
         <li><a href="/">Matrix</a></li>
         <li><a href="/functions">Functions</a></li>
         <li><a href="/tasks">Tasks</a></li>
         <li><a href="/interface">Interface</a></li>
+        <li><a href="/organisation">Organisation</a></li>
       </ul>
     </nav>
   </header>

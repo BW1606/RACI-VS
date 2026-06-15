@@ -15,17 +15,30 @@ R_SUBCATEGORIES = (
 )
 
 
+class Organisation(Base):
+    __tablename__ = "organisations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    functions: Mapped[list["Function"]] = relationship("Function", back_populates="organisation")
+    tasks: Mapped[list["Task"]] = relationship("Task", back_populates="organisation")
+
+
 class Function(Base):
     __tablename__ = "functions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    organisation_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=True)
     parent_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     description: Mapped[str] = mapped_column(Text, default="")
     aim: Mapped[str] = mapped_column(Text, default="")
     emergency_rep_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    organisation: Mapped["Organisation | None"] = relationship("Organisation", back_populates="functions")
     parent: Mapped["Function | None"] = relationship(
         "Function", foreign_keys=[parent_id], remote_side="Function.id", back_populates="children"
     )
@@ -44,10 +57,12 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String(300), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(300), nullable=False)
+    organisation_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=True)
     description: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    organisation: Mapped["Organisation | None"] = relationship("Organisation", back_populates="tasks")
     function_roles: Mapped[list["FunctionTaskRole"]] = relationship(
         "FunctionTaskRole", back_populates="task", cascade="all, delete-orphan"
     )

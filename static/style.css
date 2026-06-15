@@ -62,3 +62,135 @@ details summary {
   cursor: pointer;
   font-weight: 600;
 }
+
+/* Org switcher dropdown in nav */
+.org-switcher {
+  position: relative;
+}
+
+.org-switcher > ul {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.25rem);
+  z-index: 200;
+  background: var(--pico-card-background-color);
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: 0.4rem 0;
+  min-width: 220px;
+  list-style: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.org-switcher > ul > li {
+  padding: 0 0.6rem;
+}
+
+.org-switcher > ul > li a,
+.org-switcher > ul > li span {
+  display: block;
+  padding: 0.3rem 0.2rem;
+}
+
+.org-active {
+  font-weight: 600;
+  color: var(--pico-primary);
+}
+
+.org-create-form {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.3rem 0;
+}
+
+.org-create-form input {
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.org-create-form button {
+  margin: 0;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Org chart */
+.org-tree {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+  overflow-x: auto;
+}
+
+.org-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.org-node {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: 0.4rem 0.8rem;
+  background: var(--pico-card-background-color);
+  white-space: nowrap;
+}
+
+.org-node a {
+  text-decoration: none;
+  color: var(--pico-color);
+}
+
+.org-node a:hover {
+  color: var(--pico-primary);
+}
+
+/* Vertical stem from a parent node down to the horizontal bar */
+.org-branch:has(.org-children) > .org-node::after {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 1.2rem;
+  background: var(--pico-muted-border-color);
+  margin: 0 auto;
+}
+
+/* Row of children */
+.org-children {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+}
+
+/* Horizontal bar spanning across siblings */
+.org-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(50% - (100% - 1rem) / 2);
+  right: calc(50% - (100% - 1rem) / 2);
+  height: 2px;
+  background: var(--pico-muted-border-color);
+}
+
+/* Vertical stem from horizontal bar down to each child */
+.org-children > .org-branch {
+  padding-top: 1.2rem;
+  position: relative;
+}
+
+.org-children > .org-branch::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 1.2rem;
+  background: var(--pico-muted-border-color);
+}

@@ -1,13 +1,15 @@
 # RACI-VS Matrix Manager
 
-A locally-running web app for managing RACI-VS responsibility matrices across company functions and tasks, with Word document export.
+A locally-running web app for managing RACI-VS responsibility matrices across company functions and tasks, with Word document export. Supports multiple independent organisations in a single database.
 
 ## Features
 
+- **Multi-organisation support** — create any number of named organisations; each has its own isolated set of functions, tasks, and assignments. Switch between them from the nav bar; new organisations start completely empty.
 - **Function management** — create functions with company hierarchy, description, aim, and emergency representative
 - **Task management** — create tasks with descriptions and assign functions to them with RACI-VS roles
 - **R-role subcategory** — Responsible (R) assignments carry one of five subcategories (Ausführende Tätigkeit, Gewährleistung, Koordination, Veranlassung, Mitwirkung); visible in the function document, not in the matrix
-- **Matrix view** — live overview table of all functions vs. tasks with colour-coded roles
+- **Matrix view** — live overview table: tasks as rows, functions as columns, with colour-coded role badges
+- **Organisation chart** — visual top-down hierarchy diagram of all functions in the active organisation, based on parent-function relationships
 - **Interface analysis** — select any two functions to see the tasks they share and their respective roles
 - **Word document export** — generate `.docx` reports for function descriptions, task descriptions, and function interfaces
 
@@ -82,9 +84,13 @@ Each function can hold one role per task. Assignments can be removed from both t
 
 ### 4. View the Matrix
 
-The **Matrix** page (home) shows all functions as rows and all tasks as columns. Each cell displays the assigned role badge, colour-coded by type.
+The **Matrix** page (home) shows all tasks as rows and all functions as columns. Each cell displays the assigned role badge, colour-coded by type.
 
-### 5. Interface Between Two Functions
+### 5. View the Organisation Chart
+
+Go to **Organisation** in the navigation bar. Functions are displayed as a top-down tree diagram based on their parent-function relationships. Each box links to the function's detail page.
+
+### 6. Interface Between Two Functions
 
 Go to **Interface**, select two functions, and click **Show Interface**. The page displays every task both functions are involved in, with their respective roles side by side.
 
@@ -102,15 +108,16 @@ All documents are standard `.docx` files that open in Microsoft Word or LibreOff
 
 ### Database
 
-The app stores everything in a single SQLite file (`raci_vs.db`) managed by SQLAlchemy. There are three tables:
+The app stores everything in a single SQLite file (`raci_vs.db`) managed by SQLAlchemy. There are four tables:
 
-- **`functions`** — one row per organisational function. Optional `parent_id` and `emergency_rep_id` are both self-referential foreign keys on the same table, enabling arbitrary-depth company hierarchy and emergency coverage chains.
-- **`tasks`** — one row per task or activity.
+- **`organisations`** — one row per named organisation. All functions and tasks belong to exactly one organisation.
+- **`functions`** — one row per organisational function. `organisation_id` scopes each function to its owner. Optional `parent_id` and `emergency_rep_id` are both self-referential foreign keys, enabling arbitrary-depth company hierarchy and emergency coverage chains.
+- **`tasks`** — one row per task or activity, scoped by `organisation_id`.
 - **`function_task_roles`** — the junction table linking a function to a task. A unique constraint on `(function_id, task_id)` enforces that each function holds at most one role per task. The `role` column stores one of six values (`R`, `A`, `C`, `I`, `V`, `S`). The `r_subcategory` column is only populated when `role = 'R'`; it is `NULL` for all other roles.
 
 ### Schema migrations
 
-When a new column is introduced, `main.py` runs an `ALTER TABLE` statement at startup inside a try/except. Existing databases gain the new column automatically without losing data; if the column already exists the statement is silently skipped.
+When a new column is introduced, `main.py` runs migration SQL at startup before `create_all`. Simple column additions use `ALTER TABLE … ADD COLUMN` inside a try/except (skipped silently if the column already exists). More involved migrations — such as removing a unique constraint — rebuild the table in four steps: create a new table with the desired schema, copy data, drop the old table, rename the new one. Fresh installs skip all migrations and let `create_all` build the correct schema from the models directly. The default organisation (`test_org`) is seeded automatically on first run, and any data that pre-dates the multi-organisation feature is assigned to it.
 
 ### Request / response cycle
 
@@ -128,25 +135,27 @@ An assignment is rejected with HTTP 400 if the role is not one of the six valid 
 
 ```
 RACI-VS/
-├── main.py                   # App entry point, dashboard and interface routes
+├── main.py                   # App entry point, startup migrations, dashboard and interface routes
 ├── database.py               # SQLAlchemy engine and session
-├── models.py                 # ORM models: Function, Task, FunctionTaskRole
+├── models.py                 # ORM models: Organisation, Function, Task, FunctionTaskRole
+├── dependencies.py           # Shared FastAPI dependency: get_org_context (active organisation)
 ├── schemas.py                # Pydantic validation schemas
 ├── requirements.txt
 ├── routers/
-│   ├── functions.py          # Function CRUD endpoints
-│   ├── tasks.py              # Task CRUD endpoints
+│   ├── functions.py          # Function CRUD endpoints (org-scoped)
+│   ├── tasks.py              # Task CRUD endpoints (org-scoped)
 │   ├── assignments.py        # Role assignment endpoints
-│   └── documents.py          # .docx download endpoints
+│   └── documents.py          # .docx download endpoints (org-scoped)
 ├── services/
 │   └── docx_generator.py     # All Word document generation logic
 ├── static/
 │   └── style.css
 └── templates/
-    ├── base.html             # Shared layout with nav bar
-    ├── index.html            # Matrix dashboard
+    ├── base.html             # Shared layout with nav bar and org switcher
+    ├── index.html            # Matrix dashboard (tasks × functions)
     ├── functions/            # Function list, detail, and HTMX partials
     ├── tasks/                # Task list, detail, and HTMX partials
     ├── interface/            # Two-function interface view
+    ├── organisation/         # Organisation hierarchy chart
     └── partials/             # Shared HTMX partial templates
 ```

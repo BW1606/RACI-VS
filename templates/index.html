@@ -12,24 +12,24 @@
   <table>
     <thead>
       <tr>
-        <th class="fn-col">Function</th>
-        {% for task in tasks %}
-        <th title="{{ task.description }}">
-          <a href="/tasks/{{ task.id }}" style="font-size:0.75rem">{{ task.title }}</a>
+        <th class="fn-col">Task</th>
+        {% for fn in functions %}
+        <th title="{{ fn.description }}">
+          <a href="/functions/{{ fn.id }}" style="font-size:0.75rem">
+            {% if fn.parent %}<span style="color:var(--pico-muted-color)">└ </span>{% endif %}
+            {{ fn.name }}
+          </a>
         </th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for fn in functions %}
+      {% for task in tasks %}
       <tr>
         <td class="fn-col">
-          <a href="/functions/{{ fn.id }}">
-            {% if fn.parent %}<span style="color:var(--pico-muted-color)">└ </span>{% endif %}
-            {{ fn.name }}
-          </a>
+          <a href="/tasks/{{ task.id }}">{{ task.title }}</a>
         </td>
-        {% for task in tasks %}
+        {% for fn in functions %}
         {% set role_val = matrix.get((fn.id, task.id)) %}
         <td>
           {% if role_val %}

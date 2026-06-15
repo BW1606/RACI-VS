@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import get_org_context
 from models import Function, FunctionTaskRole, Task
 from services.docx_generator import (
     generate_function_description,
@@ -24,9 +25,9 @@ def _docx_response(buf, filename: str) -> StreamingResponse:
 
 
 @router.get("/function/{fn_id}")
-def doc_function(fn_id: int, db: Session = Depends(get_db)):
+def doc_function(fn_id: int, request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
     fn = db.get(Function, fn_id)
-    if not fn:
+    if not fn or fn.organisation_id != org_ctx["current_org_id"]:
         raise HTTPException(status_code=404, detail="Function not found")
     buf = generate_function_description(fn)
     safe_name = fn.name.replace(" ", "_")
@@ -34,9 +35,9 @@ def doc_function(fn_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/task/{task_id}")
-def doc_task(task_id: int, db: Session = Depends(get_db)):
+def doc_task(task_id: int, request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
     task = db.get(Task, task_id)
-    if not task:
+    if not task or task.organisation_id != org_ctx["current_org_id"]:
         raise HTTPException(status_code=404, detail="Task not found")
     buf = generate_task_description(task)
     safe_name = task.title.replace(" ", "_")
@@ -44,10 +45,19 @@ def doc_task(task_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/interface/{f1_id}/{f2_id}")
-def doc_interface(f1_id: int, f2_id: int, db: Session = Depends(get_db)):
+def doc_interface(
+    f1_id: int,
+    f2_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
+):
+    current_org_id = org_ctx["current_org_id"]
     fn1 = db.get(Function, f1_id)
     fn2 = db.get(Function, f2_id)
-    if not fn1 or not fn2:
+    if not fn1 or fn1.organisation_id != current_org_id:
+        raise HTTPException(status_code=404, detail="Function not found")
+    if not fn2 or fn2.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
 
     roles1 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f1_id).all()}

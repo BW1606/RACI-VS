@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import get_org_context
 from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -11,12 +12,20 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("", response_class=HTMLResponse)
-def list_tasks(request: Request, db: Session = Depends(get_db)):
-    tasks = db.query(Task).order_by(Task.title).all()
-    functions = db.query(Function).order_by(Function.name).all()
+def list_tasks(request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
+    tasks = db.query(Task).filter(Task.organisation_id == current_org_id).order_by(Task.title).all()
+    functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
     return templates.TemplateResponse(
         "tasks/list.html",
-        {"request": request, "tasks": tasks, "functions": functions, "roles": ROLES, "r_subcategories": R_SUBCATEGORIES},
+        {
+            "request": request,
+            **org_ctx,
+            "tasks": tasks,
+            "functions": functions,
+            "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
+        },
     )
 
 
@@ -29,10 +38,12 @@ def create_task(
     roles: list[str] = Form(default=[]),
     r_subcategories: list[str] = Form(default=[]),
     db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
 ):
-    if db.query(Task).filter(Task.title == title).first():
+    current_org_id = org_ctx["current_org_id"]
+    if db.query(Task).filter(Task.title == title, Task.organisation_id == current_org_id).first():
         raise HTTPException(status_code=400, detail="Task title already exists")
-    task = Task(title=title, description=description)
+    task = Task(title=title, description=description, organisation_id=current_org_id)
     db.add(task)
     db.flush()
     padded_subcats = list(r_subcategories) + [""] * max(0, len(function_ids) - len(r_subcategories))
@@ -49,22 +60,24 @@ def create_task(
     db.refresh(task)
     return templates.TemplateResponse(
         "tasks/_row.html",
-        {"request": request, "task": task},
+        {"request": request, **org_ctx, "task": task},
     )
 
 
 @router.get("/{task_id}", response_class=HTMLResponse)
-def task_detail(task_id: int, request: Request, db: Session = Depends(get_db)):
+def task_detail(task_id: int, request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
     task = db.get(Task, task_id)
-    if not task:
+    if not task or task.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Task not found")
-    all_functions = db.query(Function).order_by(Function.name).all()
+    all_functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
     assigned_fn_ids = {fr.function_id for fr in task.function_roles}
     available_functions = [f for f in all_functions if f.id not in assigned_fn_ids]
     return templates.TemplateResponse(
         "tasks/detail.html",
         {
             "request": request,
+            **org_ctx,
             "task": task,
             "all_functions": all_functions,
             "available_functions": available_functions,
@@ -81,21 +94,24 @@ def edit_task(
     title: str = Form(...),
     description: str = Form(""),
     db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
 ):
+    current_org_id = org_ctx["current_org_id"]
     task = db.get(Task, task_id)
-    if not task:
+    if not task or task.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Task not found")
     task.title = title
     task.description = description
     db.commit()
     db.refresh(task)
-    all_functions = db.query(Function).order_by(Function.name).all()
+    all_functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
     assigned_fn_ids = {fr.function_id for fr in task.function_roles}
     available_functions = [f for f in all_functions if f.id not in assigned_fn_ids]
     return templates.TemplateResponse(
         "tasks/detail.html",
         {
             "request": request,
+            **org_ctx,
             "task": task,
             "all_functions": all_functions,
             "available_functions": available_functions,
@@ -106,9 +122,10 @@ def edit_task(
 
 
 @router.delete("/{task_id}", response_class=HTMLResponse)
-def delete_task(task_id: int, db: Session = Depends(get_db)):
+def delete_task(task_id: int, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
     task = db.get(Task, task_id)
-    if not task:
+    if not task or task.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Task not found")
     db.delete(task)
     db.commit()

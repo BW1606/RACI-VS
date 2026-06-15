@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import get_org_context
 from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
 
 router = APIRouter(prefix="/functions", tags=["functions"])
@@ -20,12 +21,19 @@ def _hierarchy_path(fn: Function) -> str:
 
 
 @router.get("", response_class=HTMLResponse)
-def list_functions(request: Request, db: Session = Depends(get_db)):
-    functions = db.query(Function).order_by(Function.name).all()
-    all_functions = functions
+def list_functions(request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
+    functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
     return templates.TemplateResponse(
         "functions/list.html",
-        {"request": request, "functions": functions, "all_functions": all_functions, "roles": ROLES, "r_subcategories": R_SUBCATEGORIES},
+        {
+            "request": request,
+            **org_ctx,
+            "functions": functions,
+            "all_functions": functions,
+            "roles": ROLES,
+            "r_subcategories": R_SUBCATEGORIES,
+        },
     )
 
 
@@ -38,11 +46,14 @@ def create_function(
     aim: str = Form(""),
     emergency_rep_id: str | None = Form(None),
     db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
 ):
-    if db.query(Function).filter(Function.name == name).first():
+    current_org_id = org_ctx["current_org_id"]
+    if db.query(Function).filter(Function.name == name, Function.organisation_id == current_org_id).first():
         raise HTTPException(status_code=400, detail="Function name already exists")
     fn = Function(
         name=name,
+        organisation_id=current_org_id,
         parent_id=int(parent_id) if parent_id else None,
         description=description,
         aim=aim,
@@ -55,23 +66,25 @@ def create_function(
     fn.emergency_rep
     return templates.TemplateResponse(
         "functions/_row.html",
-        {"request": request, "fn": fn, "hierarchy_path": _hierarchy_path(fn)},
+        {"request": request, **org_ctx, "fn": fn, "hierarchy_path": _hierarchy_path(fn)},
     )
 
 
 @router.get("/{fn_id}", response_class=HTMLResponse)
-def function_detail(fn_id: int, request: Request, db: Session = Depends(get_db)):
+def function_detail(fn_id: int, request: Request, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
     fn = db.get(Function, fn_id)
-    if not fn:
+    if not fn or fn.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
-    all_functions = db.query(Function).order_by(Function.name).all()
-    all_tasks = db.query(Task).order_by(Task.title).all()
+    all_functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
+    all_tasks = db.query(Task).filter(Task.organisation_id == current_org_id).order_by(Task.title).all()
     assigned_task_ids = {tr.task_id for tr in fn.task_roles}
     available_tasks = [t for t in all_tasks if t.id not in assigned_task_ids]
     return templates.TemplateResponse(
         "functions/detail.html",
         {
             "request": request,
+            **org_ctx,
             "fn": fn,
             "hierarchy_path": _hierarchy_path(fn),
             "all_functions": all_functions,
@@ -90,9 +103,11 @@ def assign_function_to_task(
     role: str = Form(...),
     r_subcategory: str | None = Form(None),
     db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
 ):
+    current_org_id = org_ctx["current_org_id"]
     fn = db.get(Function, fn_id)
-    if not fn:
+    if not fn or fn.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
     if role not in ROLES:
         raise HTTPException(status_code=400, detail="Invalid role")
@@ -115,7 +130,7 @@ def assign_function_to_task(
     assignment.task  # eagerly load
     return templates.TemplateResponse(
         "partials/_fn_assignment_row.html",
-        {"request": request, "fr": assignment},
+        {"request": request, **org_ctx, "fr": assignment},
     )
 
 
@@ -129,9 +144,11 @@ def edit_function(
     aim: str = Form(""),
     emergency_rep_id: str | None = Form(None),
     db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
 ):
+    current_org_id = org_ctx["current_org_id"]
     fn = db.get(Function, fn_id)
-    if not fn:
+    if not fn or fn.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
     fn.name = name
     fn.parent_id = int(parent_id) if parent_id else None
@@ -140,14 +157,15 @@ def edit_function(
     fn.emergency_rep_id = int(emergency_rep_id) if emergency_rep_id else None
     db.commit()
     db.refresh(fn)
-    all_functions = db.query(Function).order_by(Function.name).all()
-    all_tasks = db.query(Task).order_by(Task.title).all()
+    all_functions = db.query(Function).filter(Function.organisation_id == current_org_id).order_by(Function.name).all()
+    all_tasks = db.query(Task).filter(Task.organisation_id == current_org_id).order_by(Task.title).all()
     assigned_task_ids = {tr.task_id for tr in fn.task_roles}
     available_tasks = [t for t in all_tasks if t.id not in assigned_task_ids]
     return templates.TemplateResponse(
         "functions/detail.html",
         {
             "request": request,
+            **org_ctx,
             "fn": fn,
             "hierarchy_path": _hierarchy_path(fn),
             "all_functions": all_functions,
@@ -159,9 +177,10 @@ def edit_function(
 
 
 @router.delete("/{fn_id}", response_class=HTMLResponse)
-def delete_function(fn_id: int, db: Session = Depends(get_db)):
+def delete_function(fn_id: int, db: Session = Depends(get_db), org_ctx: dict = Depends(get_org_context)):
+    current_org_id = org_ctx["current_org_id"]
     fn = db.get(Function, fn_id)
-    if not fn:
+    if not fn or fn.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
     db.delete(fn)
     db.commit()

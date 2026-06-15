@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Organisation – RACI-VS Manager{% endblock %}
+{% block content %}
+
+{% macro render_node(fn) %}
+<div class="org-branch">
+  <div class="org-node">
+    <a href="/functions/{{ fn.id }}">{{ fn.name }}</a>
+  </div>
+  {% if fn.children %}
+  <div class="org-children">
+    {% for child in fn.children | sort(attribute='name') %}
+      {{ render_node(child) }}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+<h2>Organisation</h2>
+{% if roots %}
+<div class="org-tree">
+  {% for root in roots | sort(attribute='name') %}
+    {{ render_node(root) }}
+  {% endfor %}
+</div>
+{% else %}
+<p>No functions defined yet. <a href="/functions">Add a function</a> to get started.</p>
+{% endif %}
+
+{% endblock %}
