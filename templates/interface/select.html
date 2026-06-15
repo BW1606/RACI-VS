@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Interface — RACI-VS{% endblock %}
+{% block content %}
+<h2>Function Interface</h2>
+<p>Select two functions to view the tasks they share and download the interface document.</p>
+
+<form method="get" action="/interface/result">
+  <div class="grid">
+    <label>Function A
+      <select name="f1" required>
+        <option value="">— select —</option>
+        {% for f in functions %}
+        <option value="{{ f.id }}" {% if f1 and f1 == f.id %}selected{% endif %}>{{ f.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Function B
+      <select name="f2" required>
+        <option value="">— select —</option>
+        {% for f in functions %}
+        <option value="{{ f.id }}" {% if f2 and f2 == f.id %}selected{% endif %}>{{ f.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <button type="submit">Show Interface</button>
+</form>
+
+{% if f1_name and f2_name %}
+<hr />
+<div style="display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap">
+  <h3 style="margin:0">{{ f1_name }} ↔ {{ f2_name }}</h3>
+  <a href="/docs/interface/{{ f1 }}/{{ f2 }}" role="button" class="outline">Download .docx</a>
+</div>
+
+{% if shared_tasks %}
+<table style="margin-top:1rem">
+  <thead>
+    <tr>
+      <th>Task</th>
+      <th>Role of {{ f1_name }}</th>
+      <th>Role of {{ f2_name }}</th>
+      <th>Task Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in shared_tasks %}
+    <tr>
+      <td><a href="/tasks/{{ row.task_id }}">{{ row.task_title }}</a></td>
+      <td><span class="role-badge role-{{ row.role_f1 }}">{{ row.role_f1 }}</span></td>
+      <td><span class="role-badge role-{{ row.role_f2 }}">{{ row.role_f2 }}</span></td>
+      <td>{{ row.task_description[:100] }}{% if row.task_description|length > 100 %}…{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--pico-muted-color);margin-top:1rem">These two functions share no tasks.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

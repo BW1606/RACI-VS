@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{{ fn.name }} — RACI-VS{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ul>
+    <li><a href="/functions">Functions</a></li>
+    <li>{{ fn.name }}</li>
+  </ul>
+</nav>
+
+<div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+  <h2 style="margin:0">{{ fn.name }}</h2>
+  <a href="/docs/function/{{ fn.id }}" role="button" class="outline">Download .docx</a>
+</div>
+
+<table>
+  <tbody>
+    <tr><th>Hierarchy</th><td>{{ hierarchy_path }}</td></tr>
+    <tr><th>Description</th><td style="white-space:pre-wrap">{{ fn.description or "—" }}</td></tr>
+    <tr><th>Aim</th><td style="white-space:pre-wrap">{{ fn.aim or "—" }}</td></tr>
+    <tr><th>Emergency Representative</th><td>
+      {% if fn.emergency_rep %}
+        <a href="/functions/{{ fn.emergency_rep.id }}">{{ fn.emergency_rep.name }}</a>
+      {% else %}—{% endif %}
+    </td></tr>
+  </tbody>
+</table>
+
+<h3>Tasks &amp; Roles</h3>
+<table>
+  <thead>
+    <tr><th>Task</th><th>Role</th><th>Task Description</th><th></th></tr>
+  </thead>
+  <tbody id="fn-assignment-tbody">
+    {% for tr in fn.task_roles %}
+    <tr id="fn-assignment-row-{{ tr.id }}">
+      <td><a href="/tasks/{{ tr.task.id }}">{{ tr.task.title }}</a></td>
+      <td><span class="role-badge role-{{ tr.role }}">{{ tr.role }}</span></td>
+      <td>{{ tr.task.description[:100] }}{% if tr.task.description|length > 100 %}…{% endif %}</td>
+      <td>
+        <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"
+          hx-delete="/assignments/{{ tr.id }}"
+          hx-target="#fn-assignment-row-{{ tr.id }}"
+          hx-swap="outerHTML">Remove</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr id="fn-no-assignments"><td colspan="4" style="color:var(--pico-muted-color)">No task assignments yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if available_tasks %}
+<form hx-post="/functions/{{ fn.id }}/assign"
+      hx-target="#fn-assignment-tbody"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset(); const e=document.getElementById('fn-no-assignments'); if(e) e.remove()">
+  <div class="grid">
+    <label>Task
+      <select name="task_id" required>
+        <option value="">— select —</option>
+        {% for t in available_tasks %}
+        <option value="{{ t.id }}">{{ t.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Role
+      <select name="role" required>
+        <option value="">— select —</option>
+        {% for r in roles %}
+        <option value="{{ r }}">{{ r }}
+          {% if r == "R" %} — Responsible
+          {% elif r == "A" %} — Accountable
+          {% elif r == "C" %} — Consulted
+          {% elif r == "I" %} — Informed
+          {% elif r == "V" %} — Verificator
+          {% elif r == "S" %} — Signator
+          {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <div style="display:flex;align-items:flex-end">
+      <button type="submit" style="width:100%">Assign</button>
+    </div>
+  </div>
+</form>
+{% else %}
+<p style="color:var(--pico-muted-color);font-size:0.9rem">All available tasks are already assigned to this function.</p>
+{% endif %}
+
+<h3>Edit Function</h3>
+<form method="post" action="/functions/{{ fn.id }}/edit">
+  <div class="grid">
+    <label>Name *
+      <input type="text" name="name" value="{{ fn.name }}" required />
+    </label>
+    <label>Parent Function
+      <select name="parent_id">
+        <option value="">— none —</option>
+        {% for f in all_functions %}
+        {% if f.id != fn.id %}
+        <option value="{{ f.id }}" {% if fn.parent_id == f.id %}selected{% endif %}>{{ f.name }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <div class="grid">
+    <label>Emergency Representative
+      <select name="emergency_rep_id">
+        <option value="">— none —</option>
+        {% for f in all_functions %}
+        {% if f.id != fn.id %}
+        <option value="{{ f.id }}" {% if fn.emergency_rep_id == f.id %}selected{% endif %}>{{ f.name }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3">{{ fn.description }}</textarea>
+  </label>
+  <label>Aim
+    <textarea name="aim" rows="3">{{ fn.aim }}</textarea>
+  </label>
+  <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

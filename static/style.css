@@ -1,0 +1,64 @@
+:root {
+  --pico-font-size: 15px;
+}
+
+.matrix-table {
+  font-size: 0.8rem;
+  overflow-x: auto;
+  display: block;
+}
+
+.matrix-table th,
+.matrix-table td {
+  text-align: center;
+  white-space: nowrap;
+  padding: 0.3rem 0.6rem;
+}
+
+.matrix-table th.fn-col {
+  text-align: left;
+  min-width: 180px;
+}
+
+.role-badge {
+  display: inline-block;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+}
+
+.role-R { background: #d1fae5; color: #065f46; }
+.role-A { background: #dbeafe; color: #1e3a8a; }
+.role-C { background: #fef9c3; color: #713f12; }
+.role-I { background: #f3e8ff; color: #4c1d95; }
+.role-V { background: #ffe4e6; color: #881337; }
+.role-S { background: #ffedd5; color: #7c2d12; }
+
+.hierarchy-indent {
+  display: inline-block;
+}
+
+nav.top-nav {
+  margin-bottom: 1.5rem;
+}
+
+.action-bar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator {
+  display: inline;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}

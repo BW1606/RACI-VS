@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Matrix — RACI-VS{% endblock %}
+{% block content %}
+<h2>RACI-VS Matrix</h2>
+
+{% if not functions or not tasks %}
+<p style="color:var(--pico-muted-color)">
+  Add <a href="/functions">functions</a> and <a href="/tasks">tasks</a>, then assign roles from the task detail page to populate the matrix.
+</p>
+{% else %}
+<div class="matrix-table">
+  <table>
+    <thead>
+      <tr>
+        <th class="fn-col">Function</th>
+        {% for task in tasks %}
+        <th title="{{ task.description }}">
+          <a href="/tasks/{{ task.id }}" style="font-size:0.75rem">{{ task.title }}</a>
+        </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for fn in functions %}
+      <tr>
+        <td class="fn-col">
+          <a href="/functions/{{ fn.id }}">
+            {% if fn.parent %}<span style="color:var(--pico-muted-color)">└ </span>{% endif %}
+            {{ fn.name }}
+          </a>
+        </td>
+        {% for task in tasks %}
+        {% set role_val = matrix.get((fn.id, task.id)) %}
+        <td>
+          {% if role_val %}
+          <span class="role-badge role-{{ role_val }}">{{ role_val }}</span>
+          {% else %}
+          <span style="color:var(--pico-muted-color)">—</span>
+          {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<details style="margin-top:1.5rem">
+  <summary>Role Legend</summary>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
+    <span class="role-badge role-R">R</span> Responsible &nbsp;
+    <span class="role-badge role-A">A</span> Accountable &nbsp;
+    <span class="role-badge role-C">C</span> Consulted &nbsp;
+    <span class="role-badge role-I">I</span> Informed &nbsp;
+    <span class="role-badge role-V">V</span> Verificator &nbsp;
+    <span class="role-badge role-S">S</span> Signator
+  </div>
+</details>
+{% endif %}
+{% endblock %}

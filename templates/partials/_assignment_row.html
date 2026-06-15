@@ -1,0 +1,12 @@
+<tr id="assignment-row-{{ fr.id }}">
+  <td><a href="/functions/{{ fr.function.id }}">{{ fr.function.name }}</a></td>
+  <td><span class="role-badge role-{{ fr.role }}">{{ fr.role }}</span></td>
+  <td>
+    <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"
+      hx-delete="/assignments/{{ fr.id }}"
+      hx-target="#assignment-row-{{ fr.id }}"
+      hx-swap="outerHTML">
+      Remove
+    </button>
+  </td>
+</tr>

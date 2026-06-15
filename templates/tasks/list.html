@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Tasks — RACI-VS{% endblock %}
+{% block content %}
+<h2>Tasks</h2>
+
+<details open>
+  <summary>Add New Task</summary>
+  <form hx-post="/tasks" hx-target="#task-tbody" hx-swap="beforeend" hx-on::after-request="this.reset()">
+    <label>Title *
+      <input type="text" name="title" required placeholder="e.g. Annual Budget Approval" />
+    </label>
+    <label>Description
+      <textarea name="description" rows="2" placeholder="Describe what this task involves…"></textarea>
+    </label>
+    <button type="submit">Add Task</button>
+  </form>
+</details>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Functions Involved</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="task-tbody">
+    {% for task in tasks %}
+    <tr id="task-row-{{ task.id }}">
+      <td><a href="/tasks/{{ task.id }}">{{ task.title }}</a></td>
+      <td>{{ task.description[:80] }}{% if task.description|length > 80 %}…{% endif %}</td>
+      <td>{{ task.function_roles|length }}</td>
+      <td>
+        <button class="outline secondary" style="padding:0.2rem 0.6rem;font-size:0.8rem"
+          hx-delete="/tasks/{{ task.id }}"
+          hx-target="#task-row-{{ task.id }}"
+          hx-swap="outerHTML"
+          hx-confirm="Delete '{{ task.title }}'? This also removes all its role assignments.">
+          Delete
+        </button>
+      </td>
+    </tr>
+    {% else %}
+    <tr id="task-empty"><td colspan="4" style="text-align:center;color:var(--pico-muted-color)">No tasks yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

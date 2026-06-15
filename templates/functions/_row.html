@@ -1,0 +1,20 @@
+<tr id="fn-row-{{ fn.id }}">
+  <td>
+    <a href="/functions/{{ fn.id }}">{{ fn.name }}</a>
+    {% if fn.parent %}
+    <br /><small style="color:var(--pico-muted-color)">{{ fn.parent.name }}</small>
+    {% endif %}
+  </td>
+  <td>{{ fn.description[:80] }}{% if fn.description|length > 80 %}…{% endif %}</td>
+  <td>{{ fn.emergency_rep.name if fn.emergency_rep else "—" }}</td>
+  <td>{{ fn.task_roles|length }}</td>
+  <td>
+    <button class="outline secondary" style="padding:0.2rem 0.6rem;font-size:0.8rem"
+      hx-delete="/functions/{{ fn.id }}"
+      hx-target="#fn-row-{{ fn.id }}"
+      hx-swap="outerHTML"
+      hx-confirm="Delete '{{ fn.name }}'? This also removes all its role assignments.">
+      Delete
+    </button>
+  </td>
+</tr>

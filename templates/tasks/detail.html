@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} — RACI-VS{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ul>
+    <li><a href="/tasks">Tasks</a></li>
+    <li>{{ task.title }}</li>
+  </ul>
+</nav>
+
+<div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+  <h2 style="margin:0">{{ task.title }}</h2>
+  <a href="/docs/task/{{ task.id }}" role="button" class="outline">Download .docx</a>
+</div>
+
+<p style="white-space:pre-wrap">{{ task.description or "No description." }}</p>
+
+<h3>Assigned Functions &amp; Roles</h3>
+<table id="assignments-table">
+  <thead>
+    <tr><th>Function</th><th>Role</th><th></th></tr>
+  </thead>
+  <tbody id="assignment-tbody">
+    {% for fr in task.function_roles %}
+    <tr id="assignment-row-{{ fr.id }}">
+      <td><a href="/functions/{{ fr.function.id }}">{{ fr.function.name }}</a></td>
+      <td><span class="role-badge role-{{ fr.role }}">{{ fr.role }}</span></td>
+      <td>
+        <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"
+          hx-delete="/assignments/{{ fr.id }}"
+          hx-target="#assignment-row-{{ fr.id }}"
+          hx-swap="outerHTML">
+          Remove
+        </button>
+      </td>
+    </tr>
+    {% else %}
+    <tr id="no-assignments"><td colspan="3" style="color:var(--pico-muted-color)">No functions assigned yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if available_functions %}
+<form hx-post="/assignments"
+      hx-target="#assignment-tbody"
+      hx-swap="beforeend"
+      hx-on::after-request="this.reset(); const e=document.getElementById('no-assignments'); if(e) e.remove()">
+  <input type="hidden" name="task_id" value="{{ task.id }}" />
+  <div class="grid">
+    <label>Function
+      <select name="function_id" required>
+        <option value="">— select —</option>
+        {% for f in available_functions %}
+        <option value="{{ f.id }}">{{ f.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Role
+      <select name="role" required>
+        <option value="">— select —</option>
+        {% for r in roles %}
+        <option value="{{ r }}">{{ r }}
+          {% if r == "R" %} — Responsible
+          {% elif r == "A" %} — Accountable
+          {% elif r == "C" %} — Consulted
+          {% elif r == "I" %} — Informed
+          {% elif r == "V" %} — Verificator
+          {% elif r == "S" %} — Signator
+          {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <div style="display:flex;align-items:flex-end">
+      <button type="submit" style="width:100%">Assign</button>
+    </div>
+  </div>
+</form>
+{% else %}
+<p style="color:var(--pico-muted-color);font-size:0.9rem">All available functions are already assigned to this task.</p>
+{% endif %}
+
+<h3>Edit Task</h3>
+<form method="post" action="/tasks/{{ task.id }}/edit">
+  <label>Title *
+    <input type="text" name="title" value="{{ task.title }}" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="3">{{ task.description }}</textarea>
+  </label>
+  <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

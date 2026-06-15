@@ -1,0 +1,11 @@
+<tr id="fn-assignment-row-{{ fr.id }}">
+  <td><a href="/tasks/{{ fr.task.id }}">{{ fr.task.title }}</a></td>
+  <td><span class="role-badge role-{{ fr.role }}">{{ fr.role }}</span></td>
+  <td>{{ fr.task.description[:100] }}{% if fr.task.description|length > 100 %}…{% endif %}</td>
+  <td>
+    <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"
+      hx-delete="/assignments/{{ fr.id }}"
+      hx-target="#fn-assignment-row-{{ fr.id }}"
+      hx-swap="outerHTML">Remove</button>
+  </td>
+</tr>
