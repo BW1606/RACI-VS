@@ -11,7 +11,7 @@ A locally-running web app for managing RACI-VS responsibility matrices across co
 - **Matrix view** — live overview table: tasks as rows, functions as columns, with colour-coded role badges
 - **Organisation chart** — visual top-down hierarchy diagram of all functions in the active organisation, based on parent-function relationships
 - **Interface analysis** — select any two functions to see the tasks they share and their respective roles
-- **Word document export** — generate `.docx` reports for function descriptions, task descriptions, and function interfaces
+- **Document preview & export** — view function descriptions, task descriptions, and interface reports directly in the browser as a formatted HTML page (opens in a new tab); download as `.docx` for Word or LibreOffice; or use the browser's print dialog to save as PDF
 
 ## Tech Stack
 
@@ -33,6 +33,7 @@ No Node.js or build step required.
 ## Installation
 
 ```bash
+git clone https://github.com/BW1606/RACI-VS.git
 cd RACI-VS
 pip install -r requirements.txt
 ```
@@ -94,15 +95,17 @@ Go to **Organisation** in the navigation bar. Functions are displayed as a top-d
 
 Go to **Interface**, select two functions, and click **Show Interface**. The page displays every task both functions are involved in, with their respective roles side by side.
 
-## Document Export
+## Document Preview & Export
 
-All documents are standard `.docx` files that open in Microsoft Word or LibreOffice.
+Each document page has two buttons: **Vorschau** opens an HTML preview in a new browser tab, and **Download .docx** downloads the same content as a Word file. The preview page has a **Drucken / PDF** button that triggers the browser's print dialog — use "Save as PDF" to export without downloading a `.docx`.
 
-| Button / Link | Document contents |
+| Page | Document contents |
 |---|---|
-| *Download .docx* on a Function page | Structured 9-section **Funktionsbeschreibung**: Organisatorische Einordnung, Ziel der Funktion, Ergebnisverantwortung (A), Durchführungsverantwortung (R) grouped by subcategory heading, Beratungsverantwortung (C), Informationsverantwortung (I), Verifikationsverantwortung (V), Befugnisse (S), Vertretung. Sections with no assignments show an italic "Details ergänzen" placeholder. |
-| *Download .docx* on a Task page | Task title, description, and a table of all assigned functions with their roles and hierarchy |
-| *Download .docx* on the Interface page | Interface header and a table of shared tasks with the role of each function |
+| Function detail | Structured 9-section **Funktionsbeschreibung**: Organisatorische Einordnung, Ziel der Funktion, Ergebnisverantwortung (A), Durchführungsverantwortung (R) grouped by subcategory heading, Beratungsverantwortung (C), Informationsverantwortung (I), Verifikationsverantwortung (V), Befugnisse (S), Vertretung. Sections with no assignments show an italic "Details ergänzen" placeholder. |
+| Task detail | Task title, description, and a table of all assigned functions with their roles and hierarchy |
+| Interface page | Interface header and a table of shared tasks with the role of each function |
+
+The `.docx` files are standard Office Open XML and open in Microsoft Word or LibreOffice.
 
 ## How it works
 
@@ -157,5 +160,6 @@ RACI-VS/
     ├── tasks/                # Task list, detail, and HTMX partials
     ├── interface/            # Two-function interface view
     ├── organisation/         # Organisation hierarchy chart
+    ├── docs/                 # In-browser document preview pages
     └── partials/             # Shared HTMX partial templates
 ```

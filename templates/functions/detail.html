@@ -10,7 +10,10 @@
 
 <div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
   <h2 style="margin:0">{{ fn.name }}</h2>
-  <a href="/docs/function/{{ fn.id }}" role="button" class="outline">Download .docx</a>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+    <a href="/docs/function/{{ fn.id }}/preview" role="button" class="outline" target="_blank">Vorschau</a>
+    <a href="/docs/function/{{ fn.id }}" role="button" class="outline secondary">Download .docx</a>
+  </div>
 </div>
 
 <table>

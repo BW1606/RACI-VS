@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Vorschau: {{ fn.name }} — RACI-VS{% endblock %}
+{% block content %}
+<div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:1.5rem">
+  <div>
+    <p style="font-size:0.85rem;color:var(--pico-muted-color);margin:0">Funktionsbeschreibung</p>
+    <h1 style="margin:0.25rem 0 0">{{ fn.name }}</h1>
+  </div>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <button onclick="window.print()" class="outline secondary">Drucken / PDF</button>
+    <a href="/docs/function/{{ fn.id }}" role="button" class="outline">Download .docx</a>
+  </div>
+</div>
+
+{% if fn.description %}
+<p style="white-space:pre-wrap">{{ fn.description }}</p>
+{% endif %}
+
+<h2>1. Organisatorische Einordnung</h2>
+<p><strong>Übergeordnete Funktion:</strong> {{ parent_chain }}</p>
+<p><strong>Untergeordnete Funktion:</strong> {{ children_names }}</p>
+
+<h2>2. Ziel der Funktion</h2>
+<p style="white-space:pre-wrap">{{ fn.aim or "—" }}</p>
+
+<h2>3. Ergebnisverantwortung (A)</h2>
+{% if by_role.A %}
+<ul>
+  {% for tr in by_role.A %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li><em>Details ergänzen</em></li></ul>
+{% endif %}
+
+<h2>4. Durchführungsverantwortung (R)</h2>
+{% for sub_key in r_subcategory_order %}
+<p><strong>{{ r_subcategory_headings[sub_key] }}</strong></p>
+{% if by_r_sub[sub_key] %}
+<ul>
+  {% for tr in by_r_sub[sub_key] %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li><em>Details ergänzen</em></li></ul>
+{% endif %}
+{% endfor %}
+
+<h2>5. Beratungsverantwortung (C)</h2>
+{% if by_role.C %}
+<ul>
+  {% for tr in by_role.C %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li><em>Details ergänzen</em></li></ul>
+{% endif %}
+
+<h2>6. Informationsverantwortung (I)</h2>
+{% if by_role.I %}
+<ul>
+  {% for tr in by_role.I %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li><em>Details ergänzen</em></li></ul>
+{% endif %}
+
+<h2>7. Verifikationsverantwortung (V)</h2>
+{% if by_role.V %}
+<ul>
+  {% for tr in by_role.V %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li><em>Details ergänzen</em></li></ul>
+{% endif %}
+
+<h2>8. Befugnisse (Signaturverantwortung S)</h2>
+{% if by_role.S %}
+<ul>
+  {% for tr in by_role.S %}
+  <li>{{ tr.task.title }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul><li>Siehe Geschäftsordnung (GO)</li></ul>
+{% endif %}
+
+<h2>9. Vertretung</h2>
+<p><strong>Vertretung von:</strong>
+{% if fn.emergency_rep %}
+  <a href="/functions/{{ fn.emergency_rep.id }}">{{ fn.emergency_rep.name }}</a>
+{% else %}
+  Details ergänzen
+{% endif %}
+</p>
+<p><strong>Wird vertreten:</strong> <em>Details ergänzen</em></p>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Vorschau: {{ fn1.name }} ↔ {{ fn2.name }} — RACI-VS{% endblock %}
+{% block content %}
+<div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:1.5rem">
+  <h1 style="margin:0">{{ fn1.name }} ↔ {{ fn2.name }}</h1>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <button onclick="window.print()" class="outline secondary">Drucken / PDF</button>
+    <a href="/docs/interface/{{ fn1.id }}/{{ fn2.id }}" role="button" class="outline">Download .docx</a>
+  </div>
+</div>
+
+<p>
+  Dieses Dokument beschreibt die gemeinsamen Aufgaben zwischen
+  <strong>{{ fn1.name }}</strong> und <strong>{{ fn2.name }}</strong>
+  sowie ihre jeweiligen Rollen.
+</p>
+
+<h2>Shared Tasks</h2>
+{% if shared_tasks %}
+<table>
+  <thead>
+    <tr>
+      <th>Task</th>
+      <th>Role of {{ fn1.name }}</th>
+      <th>Role of {{ fn2.name }}</th>
+      <th>Task Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in shared_tasks %}
+    <tr>
+      <td><a href="/tasks/{{ item.task_id }}">{{ item.task_title }}</a></td>
+      <td><span class="role-badge role-{{ item.role_f1 }}">{{ item.role_f1 }}</span></td>
+      <td><span class="role-badge role-{{ item.role_f2 }}">{{ item.role_f2 }}</span></td>
+      <td style="color:var(--pico-muted-color);font-size:0.9rem">{{ item.task_description or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--pico-muted-color)">{{ fn1.name }} and {{ fn2.name }} share no tasks.</p>
+{% endif %}
+{% endblock %}

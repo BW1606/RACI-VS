@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Vorschau: {{ task.title }} — RACI-VS{% endblock %}
+{% block content %}
+<div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:1.5rem">
+  <h1 style="margin:0">{{ task.title }}</h1>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <button onclick="window.print()" class="outline secondary">Drucken / PDF</button>
+    <a href="/docs/task/{{ task.id }}" role="button" class="outline">Download .docx</a>
+  </div>
+</div>
+
+<h2>Task Details</h2>
+<p><strong>Description:</strong></p>
+<p style="white-space:pre-wrap">{{ task.description or "—" }}</p>
+
+<h2>Involved Functions</h2>
+{% if function_rows %}
+<table>
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Role</th>
+      <th>Hierarchy</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in function_rows %}
+    <tr>
+      <td><a href="/functions/{{ row.fr.function.id }}">{{ row.fr.function.name }}</a></td>
+      <td><span class="role-badge role-{{ row.fr.role }}">{{ row.fr.role }}</span></td>
+      <td style="color:var(--pico-muted-color);font-size:0.9rem">{{ row.hierarchy }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--pico-muted-color)">No functions assigned to this task.</p>
+{% endif %}
+{% endblock %}
