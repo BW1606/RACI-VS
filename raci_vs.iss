@@ -16,6 +16,7 @@ AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
 DefaultDirName={autopf}\RACI-VS
 DefaultGroupName={#AppName}
+OutputDir=Output
 OutputBaseFilename=RACI-VS_Setup
 Compression=lzma
 SolidCompression=yes
