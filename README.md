@@ -102,7 +102,7 @@ The active organisation can be exported as a portable `.json` file and imported 
 
 **To export:** open the org-switcher dropdown in the top-left of the nav bar and click **⬇ Export current org**. The browser downloads `<org-name>_export.json`.
 
-**To import:** click **⬆ Import org (.json)** in the same dropdown and pick a previously exported file. The file is uploaded immediately (no separate submit button). A new organisation is created with all the original functions (including parent hierarchy and emergency-representative links), tasks, and role assignments. If an organisation with the same name already exists, a suffix is appended (e.g. *MyOrg (2)*), and the imported org becomes the active one.
+**To import:** click **⬆ Import org (.json)** in the same dropdown and pick a previously exported file. An example organisation (`examples/Beispiel-org.json`) is included in the repository and can be imported directly to explore the app with pre-filled data. The file is uploaded immediately (no separate submit button). A new organisation is created with all the original functions (including parent hierarchy and emergency-representative links), tasks, and role assignments. If an organisation with the same name already exists, a suffix is appended (e.g. *MyOrg (2)*), and the imported org becomes the active one.
 
 The `.json` format is human-readable and version-tagged:
 

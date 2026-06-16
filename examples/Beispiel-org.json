@@ -1,0 +1,160 @@
+{
+  "version": "1.0",
+  "organisation": {
+    "name": "Beispiel-org"
+  },
+  "functions": [
+    {
+      "ref": "f3",
+      "name": "Projektmanager",
+      "description": "managed projekte",
+      "aim": "XYZ",
+      "parent_ref": "f6",
+      "emergency_rep_ref": null
+    },
+    {
+      "ref": "f4",
+      "name": "Entwickler (Dev)",
+      "description": "entwickelt",
+      "aim": "import Claude Code:\r\n'pls fix bug '",
+      "parent_ref": "f3",
+      "emergency_rep_ref": null
+    },
+    {
+      "ref": "f5",
+      "name": "Tester (QA)",
+      "description": "Testet QA",
+      "aim": "'all full of bugs'",
+      "parent_ref": "f3",
+      "emergency_rep_ref": "f4"
+    },
+    {
+      "ref": "f6",
+      "name": "Stakeholder (SH)",
+      "description": "Holds Stakes",
+      "aim": "Will geld machen",
+      "parent_ref": null,
+      "emergency_rep_ref": null
+    }
+  ],
+  "tasks": [
+    {
+      "ref": "t8",
+      "title": "Anforderung erfassen",
+      "description": "erfasst Anforderungen"
+    },
+    {
+      "ref": "t9",
+      "title": "Code schreiben",
+      "description": "import Claude Code\n*send Anforderungen.pdf\n\n'pls built'"
+    },
+    {
+      "ref": "t10",
+      "title": "Code testen",
+      "description": "Entspricht Code den Anforderungen"
+    },
+    {
+      "ref": "t11",
+      "title": "Freigabe erteilen",
+      "description": "?"
+    }
+  ],
+  "assignments": [
+    {
+      "function_ref": "f3",
+      "task_ref": "t8",
+      "role": "R",
+      "r_subcategory": "Ausführende Tätigkeit"
+    },
+    {
+      "function_ref": "f3",
+      "task_ref": "t9",
+      "role": "A",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f3",
+      "task_ref": "t10",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f3",
+      "task_ref": "t11",
+      "role": "A",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f4",
+      "task_ref": "t8",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f4",
+      "task_ref": "t9",
+      "role": "R",
+      "r_subcategory": "Ausführende Tätigkeit"
+    },
+    {
+      "function_ref": "f4",
+      "task_ref": "t10",
+      "role": "I",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f4",
+      "task_ref": "t11",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f5",
+      "task_ref": "t8",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f5",
+      "task_ref": "t9",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f5",
+      "task_ref": "t10",
+      "role": "R",
+      "r_subcategory": "Ausführende Tätigkeit"
+    },
+    {
+      "function_ref": "f5",
+      "task_ref": "t11",
+      "role": "C",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f6",
+      "task_ref": "t8",
+      "role": "V",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f6",
+      "task_ref": "t9",
+      "role": "I",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f6",
+      "task_ref": "t10",
+      "role": "I",
+      "r_subcategory": null
+    },
+    {
+      "function_ref": "f6",
+      "task_ref": "t11",
+      "role": "I",
+      "r_subcategory": null
+    }
+  ]
+}
