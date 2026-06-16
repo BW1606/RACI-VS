@@ -1,8 +1,11 @@
 from datetime import datetime
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from fastapi import HTTPException
 
 from database import Base
+
+DEFAULT_ORG_NAME = "test_org"
 
 ROLES = ("R", "A", "C", "I", "V", "S")
 
@@ -13,6 +16,27 @@ R_SUBCATEGORIES = (
     "Veranlassung",
     "Mitwirkung",
 )
+
+
+def validate_role(role: str, r_subcategory: str | None) -> str | None:
+    """Validate role and subcategory; return cleaned r_subcategory (None for non-R roles)."""
+    if role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
+    if role == "R":
+        if not r_subcategory or r_subcategory not in R_SUBCATEGORIES:
+            raise HTTPException(status_code=400, detail="A subcategory is required for role R")
+        return r_subcategory
+    return None
+
+
+def hierarchy_path(fn) -> str:
+    """Return full ancestor path including fn itself, e.g. 'Root > Parent > fn'."""
+    parts = []
+    current = fn
+    while current:
+        parts.append(current.name)
+        current = current.parent
+    return " > ".join(reversed(parts))
 
 
 class Organisation(Base):
@@ -31,14 +55,14 @@ class Function(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    organisation_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=True)
+    organisation_id: Mapped[int] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=False)
     parent_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     description: Mapped[str] = mapped_column(Text, default="")
     aim: Mapped[str] = mapped_column(Text, default="")
     emergency_rep_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    organisation: Mapped["Organisation | None"] = relationship("Organisation", back_populates="functions")
+    organisation: Mapped["Organisation"] = relationship("Organisation", back_populates="functions")
     parent: Mapped["Function | None"] = relationship(
         "Function", foreign_keys=[parent_id], remote_side="Function.id", back_populates="children"
     )
@@ -58,11 +82,11 @@ class Task(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(300), nullable=False)
-    organisation_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=True)
+    organisation_id: Mapped[int] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    organisation: Mapped["Organisation | None"] = relationship("Organisation", back_populates="tasks")
+    organisation: Mapped["Organisation"] = relationship("Organisation", back_populates="tasks")
     function_roles: Mapped[list["FunctionTaskRole"]] = relationship(
         "FunctionTaskRole", back_populates="task", cascade="all, delete-orphan"
     )

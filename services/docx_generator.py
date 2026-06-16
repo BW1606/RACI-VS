@@ -4,6 +4,8 @@ from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
+from models import hierarchy_path, R_SUBCATEGORIES
+
 ROLE_LABELS = {
     "R": "Responsible",
     "A": "Accountable",
@@ -21,13 +23,7 @@ R_SUBCATEGORY_HEADINGS = {
     "Mitwirkung": "Mitwirken",
 }
 
-R_SUBCATEGORY_ORDER = [
-    "Ausführende Tätigkeit",
-    "Gewährleistung",
-    "Koordination",
-    "Veranlassung",
-    "Mitwirkung",
-]
+R_SUBCATEGORY_ORDER = list(R_SUBCATEGORIES)
 
 
 def _add_field(doc: Document, label: str, value: str) -> None:
@@ -68,12 +64,7 @@ def generate_function_description(fn) -> BytesIO:
     # 1. Organisatorische Einordnung
     doc.add_heading("1. Organisatorische Einordnung", level=2)
 
-    parent_parts = []
-    current = fn.parent
-    while current:
-        parent_parts.append(current.name)
-        current = current.parent
-    parent_chain = " > ".join(reversed(parent_parts)) if parent_parts else "—"
+    parent_chain = hierarchy_path(fn.parent) or "—"
     _add_field(doc, "Übergeordnete Funktion", parent_chain)
 
     children_names = ", ".join(c.name for c in fn.children) if fn.children else "—"
@@ -188,17 +179,10 @@ def generate_task_description(task) -> BytesIO:
         _set_table_header_style(table.rows[0])
 
         for fr in task.function_roles:
-            parts = []
-            current = fr.function
-            while current:
-                parts.append(current.name)
-                current = current.parent
-            hierarchy = " > ".join(reversed(parts))
-
             row = table.add_row().cells
             row[0].text = fr.function.name
             row[1].text = f"{fr.role} — {ROLE_LABELS.get(fr.role, fr.role)}"
-            row[2].text = hierarchy
+            row[2].text = hierarchy_path(fr.function)
     else:
         doc.add_paragraph("No functions assigned to this task.")
 

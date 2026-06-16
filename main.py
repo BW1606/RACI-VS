@@ -9,7 +9,8 @@ import models
 from database import Base, engine, get_db
 from dependencies import get_org_context
 from routers import assignments, documents, functions, tasks
-from models import Function, FunctionTaskRole, Organisation, Task
+from routers.documents import get_shared_tasks
+from models import DEFAULT_ORG_NAME, Function, FunctionTaskRole, Organisation, Task
 
 app = FastAPI(title="RACI-VS Manager")
 
@@ -74,6 +75,42 @@ with engine.connect() as _conn:
             _conn.execute(text("ALTER TABLE tasks_new RENAME TO tasks"))
             _conn.commit()
 
+    # Enforce NOT NULL on organisation_id now that backfill is guaranteed
+    fn_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
+    if fn_cols.get("organisation_id") and fn_cols["organisation_id"][3] == 0:  # notnull flag == 0
+        _conn.execute(text("""
+            CREATE TABLE functions_nn (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(200) NOT NULL,
+                parent_id INTEGER,
+                description TEXT DEFAULT '',
+                aim TEXT DEFAULT '',
+                emergency_rep_id INTEGER,
+                created_at DATETIME,
+                organisation_id INTEGER NOT NULL
+            )
+        """))
+        _conn.execute(text("INSERT INTO functions_nn SELECT * FROM functions"))
+        _conn.execute(text("DROP TABLE functions"))
+        _conn.execute(text("ALTER TABLE functions_nn RENAME TO functions"))
+        _conn.commit()
+
+    task_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(tasks)")).fetchall()}
+    if task_cols.get("organisation_id") and task_cols["organisation_id"][3] == 0:
+        _conn.execute(text("""
+            CREATE TABLE tasks_nn (
+                id INTEGER PRIMARY KEY,
+                title VARCHAR(300) NOT NULL,
+                description TEXT DEFAULT '',
+                created_at DATETIME,
+                organisation_id INTEGER NOT NULL
+            )
+        """))
+        _conn.execute(text("INSERT INTO tasks_nn SELECT * FROM tasks"))
+        _conn.execute(text("DROP TABLE tasks"))
+        _conn.execute(text("ALTER TABLE tasks_nn RENAME TO tasks"))
+        _conn.commit()
+
 Base.metadata.create_all(bind=engine)
 
 # Seed default org and backfill existing rows
@@ -81,7 +118,7 @@ with engine.connect() as _conn:
     org_count = _conn.execute(text("SELECT COUNT(*) FROM organisations")).scalar()
     if org_count == 0:
         _conn.execute(text(
-            "INSERT INTO organisations (name, created_at) VALUES ('test_org', datetime('now'))"
+            f"INSERT INTO organisations (name, created_at) VALUES ('{DEFAULT_ORG_NAME}', datetime('now'))"
         ))
         _conn.commit()
     _conn.execute(text(
@@ -200,21 +237,7 @@ def interface_result(
 
     shared_tasks = []
     if fn1 and fn2 and f1 != f2:
-        roles1 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f1).all()}
-        roles2 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f2).all()}
-        shared_task_ids = set(roles1.keys()) & set(roles2.keys())
-        for tid in shared_task_ids:
-            task = db.get(Task, tid)
-            shared_tasks.append(
-                {
-                    "task_id": tid,
-                    "task_title": task.title,
-                    "task_description": task.description,
-                    "role_f1": roles1[tid].role,
-                    "role_f2": roles2[tid].role,
-                }
-            )
-        shared_tasks.sort(key=lambda x: x["task_title"])
+        shared_tasks = get_shared_tasks(db, f1, f2)
 
     return templates.TemplateResponse(
         "interface/select.html",

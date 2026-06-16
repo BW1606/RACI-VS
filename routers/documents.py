@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from dependencies import get_org_context
-from models import Function, FunctionTaskRole, Task
+from models import Function, FunctionTaskRole, Task, hierarchy_path
 from services.docx_generator import (
     R_SUBCATEGORY_HEADINGS,
     R_SUBCATEGORY_ORDER,
@@ -18,6 +18,23 @@ router = APIRouter(prefix="/docs", tags=["documents"])
 templates = Jinja2Templates(directory="templates")
 
 _MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+def get_shared_tasks(db: Session, f1_id: int, f2_id: int) -> list[dict]:
+    roles1 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f1_id).all()}
+    roles2 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f2_id).all()}
+    shared = []
+    for tid in set(roles1) & set(roles2):
+        task = db.get(Task, tid)
+        shared.append({
+            "task_id": tid,
+            "task_title": task.title,
+            "task_description": task.description,
+            "role_f1": roles1[tid].role,
+            "role_f2": roles2[tid].role,
+        })
+    shared.sort(key=lambda x: x["task_title"])
+    return shared
 
 
 def _docx_response(buf, filename: str) -> StreamingResponse:
@@ -64,24 +81,7 @@ def doc_interface(
     if not fn2 or fn2.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
 
-    roles1 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f1_id).all()}
-    roles2 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f2_id).all()}
-    shared_task_ids = set(roles1.keys()) & set(roles2.keys())
-
-    shared_tasks = []
-    for tid in shared_task_ids:
-        task = db.get(Task, tid)
-        shared_tasks.append(
-            {
-                "task_id": tid,
-                "task_title": task.title,
-                "task_description": task.description,
-                "role_f1": roles1[tid].role,
-                "role_f2": roles2[tid].role,
-            }
-        )
-    shared_tasks.sort(key=lambda x: x["task_title"])
-
+    shared_tasks = get_shared_tasks(db, f1_id, f2_id)
     buf = generate_interface_description(fn1, fn2, shared_tasks)
     return _docx_response(buf, f"Interface_{fn1.name}_{fn2.name}.docx".replace(" ", "_"))
 
@@ -92,12 +92,7 @@ def preview_function(fn_id: int, request: Request, db: Session = Depends(get_db)
     if not fn or fn.organisation_id != org_ctx["current_org_id"]:
         raise HTTPException(status_code=404, detail="Function not found")
 
-    parent_parts = []
-    current = fn.parent
-    while current:
-        parent_parts.append(current.name)
-        current = current.parent
-    parent_chain = " > ".join(reversed(parent_parts)) or "—"
+    parent_chain = hierarchy_path(fn.parent) or "—"
 
     children_names = ", ".join(c.name for c in fn.children) if fn.children else "—"
 
@@ -131,17 +126,10 @@ def preview_task(task_id: int, request: Request, db: Session = Depends(get_db), 
     if not task or task.organisation_id != org_ctx["current_org_id"]:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    function_rows = []
-    for fr in task.function_roles:
-        parts = []
-        current = fr.function
-        while current:
-            parts.append(current.name)
-            current = current.parent
-        function_rows.append({
-            "fr": fr,
-            "hierarchy": " > ".join(reversed(parts)),
-        })
+    function_rows = [
+        {"fr": fr, "hierarchy": hierarchy_path(fr.function)}
+        for fr in task.function_roles
+    ]
 
     return templates.TemplateResponse("docs/task_preview.html", {
         "request": request,
@@ -167,21 +155,7 @@ def preview_interface(
     if not fn2 or fn2.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
 
-    roles1 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f1_id).all()}
-    roles2 = {r.task_id: r for r in db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id == f2_id).all()}
-    shared_task_ids = set(roles1.keys()) & set(roles2.keys())
-
-    shared_tasks = []
-    for tid in shared_task_ids:
-        task = db.get(Task, tid)
-        shared_tasks.append({
-            "task_id": tid,
-            "task_title": task.title,
-            "task_description": task.description,
-            "role_f1": roles1[tid].role,
-            "role_f2": roles2[tid].role,
-        })
-    shared_tasks.sort(key=lambda x: x["task_title"])
+    shared_tasks = get_shared_tasks(db, f1_id, f2_id)
 
     return templates.TemplateResponse("docs/interface_preview.html", {
         "request": request,

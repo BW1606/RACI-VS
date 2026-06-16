@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from dependencies import get_org_context
-from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
+from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES, validate_role
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 templates = Jinja2Templates(directory="templates")
@@ -48,13 +48,7 @@ def create_task(
     db.flush()
     padded_subcats = list(r_subcategories) + [""] * max(0, len(function_ids) - len(r_subcategories))
     for fn_id, role, r_sub in zip(function_ids, roles, padded_subcats):
-        if role not in ROLES:
-            raise HTTPException(status_code=400, detail=f"Invalid role: {role}")
-        if role == "R":
-            if not r_sub or r_sub not in R_SUBCATEGORIES:
-                raise HTTPException(status_code=400, detail="A subcategory is required for role R")
-        else:
-            r_sub = None
+        r_sub = validate_role(role, r_sub or None)
         db.add(FunctionTaskRole(function_id=fn_id, task_id=task.id, role=role, r_subcategory=r_sub))
     db.commit()
     db.refresh(task)

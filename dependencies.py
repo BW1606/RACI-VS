@@ -2,13 +2,13 @@ from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Organisation
+from models import DEFAULT_ORG_NAME, Organisation
 
 
 def get_org_context(request: Request, db: Session = Depends(get_db)) -> dict:
     all_orgs = db.query(Organisation).order_by(Organisation.name).all()
     if not all_orgs:
-        default = Organisation(name="test_org")
+        default = Organisation(name=DEFAULT_ORG_NAME)
         db.add(default)
         db.commit()
         db.refresh(default)

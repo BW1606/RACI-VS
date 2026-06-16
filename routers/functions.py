@@ -5,19 +5,10 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from dependencies import get_org_context
-from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES
+from models import Function, FunctionTaskRole, Task, ROLES, R_SUBCATEGORIES, hierarchy_path, validate_role
 
 router = APIRouter(prefix="/functions", tags=["functions"])
 templates = Jinja2Templates(directory="templates")
-
-
-def _hierarchy_path(fn: Function) -> str:
-    parts = []
-    current = fn
-    while current:
-        parts.append(current.name)
-        current = current.parent
-    return " > ".join(reversed(parts))
 
 
 @router.get("", response_class=HTMLResponse)
@@ -66,7 +57,7 @@ def create_function(
     fn.emergency_rep
     return templates.TemplateResponse(
         "functions/_row.html",
-        {"request": request, **org_ctx, "fn": fn, "hierarchy_path": _hierarchy_path(fn)},
+        {"request": request, **org_ctx, "fn": fn, "hierarchy_path": hierarchy_path(fn)},
     )
 
 
@@ -86,7 +77,7 @@ def function_detail(fn_id: int, request: Request, db: Session = Depends(get_db),
             "request": request,
             **org_ctx,
             "fn": fn,
-            "hierarchy_path": _hierarchy_path(fn),
+            "hierarchy_path": hierarchy_path(fn),
             "all_functions": all_functions,
             "available_tasks": available_tasks,
             "roles": ROLES,
@@ -109,13 +100,7 @@ def assign_function_to_task(
     fn = db.get(Function, fn_id)
     if not fn or fn.organisation_id != current_org_id:
         raise HTTPException(status_code=404, detail="Function not found")
-    if role not in ROLES:
-        raise HTTPException(status_code=400, detail="Invalid role")
-    if role == "R":
-        if not r_subcategory or r_subcategory not in R_SUBCATEGORIES:
-            raise HTTPException(status_code=400, detail="A subcategory is required for role R")
-    else:
-        r_subcategory = None
+    r_subcategory = validate_role(role, r_subcategory)
     existing = (
         db.query(FunctionTaskRole)
         .filter(FunctionTaskRole.function_id == fn_id, FunctionTaskRole.task_id == task_id)
@@ -167,7 +152,7 @@ def edit_function(
             "request": request,
             **org_ctx,
             "fn": fn,
-            "hierarchy_path": _hierarchy_path(fn),
+            "hierarchy_path": hierarchy_path(fn),
             "all_functions": all_functions,
             "available_tasks": available_tasks,
             "roles": ROLES,
