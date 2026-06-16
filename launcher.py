@@ -24,7 +24,9 @@ URL = f"http://127.0.0.1:{PORT}"
 
 
 def _run_server() -> None:
-    uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_level="warning")
+    # log_config=None prevents uvicorn's default formatter from calling
+    # sys.stdout.isatty(), which crashes when built with --noconsole (stdout is None)
+    uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=None)
 
 
 def _open_browser() -> None:
