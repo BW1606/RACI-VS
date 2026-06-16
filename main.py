@@ -1,3 +1,6 @@
+import os
+import sys
+
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +10,12 @@ from sqlalchemy.orm import Session
 
 import models
 from database import Base, engine, get_db
+
+
+def resource_path(relative: str) -> str:
+    """Resolve a path to a bundled asset, works both in source and PyInstaller."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative)
 from dependencies import get_org_context
 from routers import assignments, documents, functions, organisations, tasks
 from routers.documents import get_shared_tasks
@@ -133,14 +142,14 @@ with engine.connect() as _conn:
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=resource_path("static")), name="static")
 app.include_router(functions.router)
 app.include_router(tasks.router)
 app.include_router(assignments.router)
 app.include_router(documents.router)
 app.include_router(organisations.router)
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=resource_path("templates"))
 
 # ── Organisation management ───────────────────────────────────────────────────
 
