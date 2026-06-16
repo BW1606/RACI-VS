@@ -21,6 +21,7 @@ import webbrowser
 import pystray
 import uvicorn
 from PIL import Image
+from main import app as fastapi_app
 
 PORT = 8000
 URL = f"http://127.0.0.1:{PORT}"
@@ -61,7 +62,7 @@ def _run_server() -> None:
     log_file.write(f"=== RACI-VS server starting ===\n")
 
     try:
-        uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=UVICORN_LOG_CONFIG)
+        uvicorn.run(fastapi_app, host="127.0.0.1", port=PORT, log_config=UVICORN_LOG_CONFIG)
     except BaseException:
         tb = traceback.format_exc()
         log_file.write(tb)
