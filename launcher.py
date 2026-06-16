@@ -9,10 +9,12 @@ Build with build.bat (PyInstaller). For development, run directly:
     python launcher.py
 """
 
+import ctypes
 import os
 import sys
 import threading
 import time
+import traceback
 import webbrowser
 
 import pystray
@@ -23,10 +25,17 @@ PORT = 8000
 URL = f"http://127.0.0.1:{PORT}"
 
 
+def _show_error(msg: str) -> None:
+    ctypes.windll.user32.MessageBoxW(0, msg, "RACI-VS — Server Error", 0x10)
+
+
 def _run_server() -> None:
-    # log_config=None prevents uvicorn's default formatter from calling
-    # sys.stdout.isatty(), which crashes when built with --noconsole (stdout is None)
-    uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=None)
+    try:
+        # log_config=None prevents uvicorn's default formatter from calling
+        # sys.stdout.isatty(), which crashes when built with --noconsole (stdout is None)
+        uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=None)
+    except Exception:
+        _show_error(traceback.format_exc())
 
 
 def _open_browser() -> None:
