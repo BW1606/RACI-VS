@@ -10,6 +10,7 @@ Build with build.bat (PyInstaller). For development, run directly:
 """
 
 import ctypes
+import logging
 import os
 import sys
 import threading
@@ -24,18 +25,47 @@ from PIL import Image
 PORT = 8000
 URL = f"http://127.0.0.1:{PORT}"
 
+LOG_PATH = os.path.join(os.path.dirname(sys.executable), "raci_vs.log")
+
+# File-based log config: no StreamHandler so sys.stdout.isatty() is never called.
+# Captures all uvicorn output to LOG_PATH for post-mortem debugging.
+UVICORN_LOG_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {"()": "logging.Formatter", "fmt": "%(asctime)s %(levelname)s %(message)s"},
+        "access":  {"()": "logging.Formatter", "fmt": "%(asctime)s %(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "default": {"class": "logging.FileHandler", "filename": LOG_PATH, "formatter": "default"},
+        "access":  {"class": "logging.FileHandler", "filename": LOG_PATH, "formatter": "access"},
+    },
+    "loggers": {
+        "uvicorn":        {"handlers": ["default"], "level": "INFO"},
+        "uvicorn.error":  {"handlers": ["default"], "level": "INFO"},
+        "uvicorn.access": {"handlers": ["access"],  "level": "INFO", "propagate": False},
+    },
+}
+
 
 def _show_error(msg: str) -> None:
     ctypes.windll.user32.MessageBoxW(0, msg, "RACI-VS — Server Error", 0x10)
 
 
 def _run_server() -> None:
+    # Redirect stdout/stderr to the log file so any print() or raw stderr output
+    # from app code or PyInstaller internals is captured.
+    log_file = open(LOG_PATH, "w", buffering=1, encoding="utf-8")
+    sys.stdout = log_file
+    sys.stderr = log_file
+    log_file.write(f"=== RACI-VS server starting ===\n")
+
     try:
-        # log_config=None prevents uvicorn's default formatter from calling
-        # sys.stdout.isatty(), which crashes when built with --noconsole (stdout is None)
-        uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=None)
-    except Exception:
-        _show_error(traceback.format_exc())
+        uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_config=UVICORN_LOG_CONFIG)
+    except BaseException:
+        tb = traceback.format_exc()
+        log_file.write(tb)
+        _show_error(tb)
 
 
 def _open_browser() -> None:
