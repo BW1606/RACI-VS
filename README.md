@@ -49,6 +49,58 @@ Open [http://localhost:8000](http://localhost:8000) in your browser.
 
 The SQLite database (`raci_vs.db`) is created automatically on first run.
 
+## Shared Database Setup (Azure SQL)
+
+By default, every user runs against their own local SQLite file. To share a single database across a team — so all colleagues read and write the same data — replace the SQLite backend with an Azure SQL Database hosted in your company's Microsoft Azure tenant. Local mode continues to work unchanged: if no `.env` file is present, the app falls back to `raci_vs.db` automatically.
+
+### A — Azure Admin (one-time)
+
+1. **Create an Azure SQL Database**
+   In the Azure Portal, create a new **SQL Server** and attach a **SQL Database** to it (Basic tier, up to 2 GB, ~€5/month is sufficient for this use case). Note the **Server name** (e.g. `mycompany.database.windows.net`) and the **Database name** — you will share these with users.
+
+2. **Enable Azure AD / Entra ID authentication**
+   On the SQL Server resource → *Microsoft Entra ID* blade → set yourself (or the IT admin account) as the Entra ID admin.
+
+3. **Add each user to the database**
+   Connect to the database with the admin account (using [Azure Data Studio](https://learn.microsoft.com/en-us/azure-data-studio/download-azure-data-studio) or SSMS) and run the following for each person who needs access:
+   ```sql
+   CREATE USER [user@company.com] FROM EXTERNAL PROVIDER;
+   ALTER ROLE db_datareader ADD MEMBER [user@company.com];
+   ALTER ROLE db_datawriter ADD MEMBER [user@company.com];
+   ```
+   Replace `user@company.com` with the user's M365 work email.
+
+4. **Configure the firewall**
+   On the SQL Server resource → *Networking* → add the company's public IP range under *Firewall rules* so connections from users' machines are allowed.
+
+5. **Share the connection details**
+   Send each user the server name and database name (e.g. via Teams). No password needs to be shared — users authenticate with their own M365 account.
+
+### B — Each User
+
+1. **Install the ODBC Driver 18 for SQL Server**
+   Download it from [Microsoft's documentation page](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server) and run the Windows `.msi` installer.
+
+2. **Create a `.env` file in the project root**
+   Copy `.env.example` to `.env` and set `DATABASE_URL`:
+   ```
+   DATABASE_URL=mssql+pyodbc://@<your-server>.database.windows.net/<database-name>?driver=ODBC+Driver+18+for+SQL+Server&Authentication=ActiveDirectoryIntegrated&Encrypt=yes
+   ```
+   Replace `<your-server>` and `<database-name>` with the values from the admin.
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the app as normal**
+   ```bash
+   uvicorn main:app --reload
+   ```
+   On the very first run, the database schema is created automatically. From that point on, every user's local app instance reads and writes the same shared Azure SQL database.
+
+> **Authentication note:** `ActiveDirectoryIntegrated` uses your current Windows/M365 session silently — no login prompt appears on domain-joined machines. On non-domain machines (e.g. a personal laptop connected via VPN), change the parameter to `Authentication=ActiveDirectoryInteractive`; a browser login window will open on the first connection and then cache the token.
+
 ## Usage
 
 ### 1. Create Functions

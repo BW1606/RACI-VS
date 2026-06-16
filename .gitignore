@@ -20,6 +20,7 @@ env/
 # Environment variables / secrets
 .env
 .env.*
+!.env.example
 
 # IDE
 .vscode/
@@ -28,3 +29,6 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local notes / plans (not for version control)
+.notes/

@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 import models
-from database import Base, engine, get_db
+from database import DATABASE_URL, Base, engine, get_db
 from dependencies import get_org_context
 from routers import assignments, documents, functions, organisations, tasks
 from routers.documents import get_shared_tasks
@@ -16,23 +16,70 @@ app = FastAPI(title="RACI-VS Manager")
 
 # ── Startup migrations ────────────────────────────────────────────────────────
 
-with engine.connect() as _conn:
-    # r_subcategory column (legacy migration)
-    try:
-        _conn.execute(text("ALTER TABLE function_task_roles ADD COLUMN r_subcategory VARCHAR(50)"))
-        _conn.commit()
-    except Exception:
-        pass  # column already exists
+if DATABASE_URL.startswith("sqlite"):
+    # SQLite-only: upgrade legacy local databases that pre-date multi-org support.
+    # Azure SQL installs skip this block entirely — create_all() below builds the
+    # correct schema from scratch.
+    with engine.connect() as _conn:
+        try:
+            _conn.execute(text("ALTER TABLE function_task_roles ADD COLUMN r_subcategory VARCHAR(50)"))
+            _conn.commit()
+        except Exception:
+            pass  # column already exists
 
-    # Rebuild functions table: drop global unique on name, add organisation_id
-    fn_exists = _conn.execute(
-        text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='functions'")
-    ).fetchone()
-    if fn_exists:
-        fn_cols = {row[1] for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
-        if "organisation_id" not in fn_cols:
+        fn_exists = _conn.execute(
+            text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='functions'")
+        ).fetchone()
+        if fn_exists:
+            fn_cols = {row[1] for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
+            if "organisation_id" not in fn_cols:
+                _conn.execute(text("""
+                    CREATE TABLE functions_new (
+                        id INTEGER PRIMARY KEY,
+                        name VARCHAR(200) NOT NULL,
+                        parent_id INTEGER,
+                        description TEXT DEFAULT '',
+                        aim TEXT DEFAULT '',
+                        emergency_rep_id INTEGER,
+                        created_at DATETIME,
+                        organisation_id INTEGER
+                    )
+                """))
+                _conn.execute(text(
+                    "INSERT INTO functions_new "
+                    "SELECT id, name, parent_id, description, aim, emergency_rep_id, created_at, NULL "
+                    "FROM functions"
+                ))
+                _conn.execute(text("DROP TABLE functions"))
+                _conn.execute(text("ALTER TABLE functions_new RENAME TO functions"))
+                _conn.commit()
+
+        task_exists = _conn.execute(
+            text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='tasks'")
+        ).fetchone()
+        if task_exists:
+            task_cols = {row[1] for row in _conn.execute(text("PRAGMA table_info(tasks)")).fetchall()}
+            if "organisation_id" not in task_cols:
+                _conn.execute(text("""
+                    CREATE TABLE tasks_new (
+                        id INTEGER PRIMARY KEY,
+                        title VARCHAR(300) NOT NULL,
+                        description TEXT DEFAULT '',
+                        created_at DATETIME,
+                        organisation_id INTEGER
+                    )
+                """))
+                _conn.execute(text(
+                    "INSERT INTO tasks_new SELECT id, title, description, created_at, NULL FROM tasks"
+                ))
+                _conn.execute(text("DROP TABLE tasks"))
+                _conn.execute(text("ALTER TABLE tasks_new RENAME TO tasks"))
+                _conn.commit()
+
+        fn_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
+        if fn_cols.get("organisation_id") and fn_cols["organisation_id"][3] == 0:
             _conn.execute(text("""
-                CREATE TABLE functions_new (
+                CREATE TABLE functions_nn (
                     id INTEGER PRIMARY KEY,
                     name VARCHAR(200) NOT NULL,
                     parent_id INTEGER,
@@ -40,96 +87,50 @@ with engine.connect() as _conn:
                     aim TEXT DEFAULT '',
                     emergency_rep_id INTEGER,
                     created_at DATETIME,
-                    organisation_id INTEGER
+                    organisation_id INTEGER NOT NULL
                 )
             """))
-            _conn.execute(text(
-                "INSERT INTO functions_new "
-                "SELECT id, name, parent_id, description, aim, emergency_rep_id, created_at, NULL "
-                "FROM functions"
-            ))
+            _conn.execute(text("INSERT INTO functions_nn SELECT * FROM functions"))
             _conn.execute(text("DROP TABLE functions"))
-            _conn.execute(text("ALTER TABLE functions_new RENAME TO functions"))
+            _conn.execute(text("ALTER TABLE functions_nn RENAME TO functions"))
             _conn.commit()
 
-    # Rebuild tasks table: drop global unique on title, add organisation_id
-    task_exists = _conn.execute(
-        text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='tasks'")
-    ).fetchone()
-    if task_exists:
-        task_cols = {row[1] for row in _conn.execute(text("PRAGMA table_info(tasks)")).fetchall()}
-        if "organisation_id" not in task_cols:
+        task_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(tasks)")).fetchall()}
+        if task_cols.get("organisation_id") and task_cols["organisation_id"][3] == 0:
             _conn.execute(text("""
-                CREATE TABLE tasks_new (
+                CREATE TABLE tasks_nn (
                     id INTEGER PRIMARY KEY,
                     title VARCHAR(300) NOT NULL,
                     description TEXT DEFAULT '',
                     created_at DATETIME,
-                    organisation_id INTEGER
+                    organisation_id INTEGER NOT NULL
                 )
             """))
-            _conn.execute(text(
-                "INSERT INTO tasks_new SELECT id, title, description, created_at, NULL FROM tasks"
-            ))
+            _conn.execute(text("INSERT INTO tasks_nn SELECT * FROM tasks"))
             _conn.execute(text("DROP TABLE tasks"))
-            _conn.execute(text("ALTER TABLE tasks_new RENAME TO tasks"))
+            _conn.execute(text("ALTER TABLE tasks_nn RENAME TO tasks"))
             _conn.commit()
-
-    # Enforce NOT NULL on organisation_id now that backfill is guaranteed
-    fn_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
-    if fn_cols.get("organisation_id") and fn_cols["organisation_id"][3] == 0:  # notnull flag == 0
-        _conn.execute(text("""
-            CREATE TABLE functions_nn (
-                id INTEGER PRIMARY KEY,
-                name VARCHAR(200) NOT NULL,
-                parent_id INTEGER,
-                description TEXT DEFAULT '',
-                aim TEXT DEFAULT '',
-                emergency_rep_id INTEGER,
-                created_at DATETIME,
-                organisation_id INTEGER NOT NULL
-            )
-        """))
-        _conn.execute(text("INSERT INTO functions_nn SELECT * FROM functions"))
-        _conn.execute(text("DROP TABLE functions"))
-        _conn.execute(text("ALTER TABLE functions_nn RENAME TO functions"))
-        _conn.commit()
-
-    task_cols = {row[1]: row for row in _conn.execute(text("PRAGMA table_info(tasks)")).fetchall()}
-    if task_cols.get("organisation_id") and task_cols["organisation_id"][3] == 0:
-        _conn.execute(text("""
-            CREATE TABLE tasks_nn (
-                id INTEGER PRIMARY KEY,
-                title VARCHAR(300) NOT NULL,
-                description TEXT DEFAULT '',
-                created_at DATETIME,
-                organisation_id INTEGER NOT NULL
-            )
-        """))
-        _conn.execute(text("INSERT INTO tasks_nn SELECT * FROM tasks"))
-        _conn.execute(text("DROP TABLE tasks"))
-        _conn.execute(text("ALTER TABLE tasks_nn RENAME TO tasks"))
-        _conn.commit()
 
 Base.metadata.create_all(bind=engine)
 
-# Seed default org and backfill existing rows
-with engine.connect() as _conn:
-    org_count = _conn.execute(text("SELECT COUNT(*) FROM organisations")).scalar()
-    if org_count == 0:
-        _conn.execute(text(
-            f"INSERT INTO organisations (name, created_at) VALUES ('{DEFAULT_ORG_NAME}', datetime('now'))"
-        ))
-        _conn.commit()
-    _conn.execute(text(
-        "UPDATE functions SET organisation_id = (SELECT id FROM organisations LIMIT 1) "
-        "WHERE organisation_id IS NULL"
-    ))
-    _conn.execute(text(
-        "UPDATE tasks SET organisation_id = (SELECT id FROM organisations LIMIT 1) "
-        "WHERE organisation_id IS NULL"
-    ))
-    _conn.commit()
+# Seed default org and backfill (ORM-based — works on SQLite and SQL Server)
+with Session(engine) as _s:
+    if _s.query(Organisation).count() == 0:
+        _default_org = Organisation(name=DEFAULT_ORG_NAME)
+        _s.add(_default_org)
+        _s.flush()
+        _org_id = _default_org.id
+    else:
+        _org_id = _s.query(Organisation.id).scalar()
+    _s.execute(
+        text("UPDATE functions SET organisation_id = :oid WHERE organisation_id IS NULL"),
+        {"oid": _org_id},
+    )
+    _s.execute(
+        text("UPDATE tasks SET organisation_id = :oid WHERE organisation_id IS NULL"),
+        {"oid": _org_id},
+    )
+    _s.commit()
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 
