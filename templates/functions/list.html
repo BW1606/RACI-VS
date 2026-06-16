@@ -3,42 +3,6 @@
 {% block content %}
 <h2>Functions</h2>
 
-<details open>
-  <summary>Add New Function</summary>
-  <form hx-post="/functions" hx-target="#fn-tbody" hx-swap="beforeend" hx-on::after-request="this.reset(); const e=document.getElementById('fn-empty'); if(e) e.remove()">
-    <div class="grid">
-      <label>Name *
-        <input type="text" name="name" required placeholder="e.g. Project Manager" />
-      </label>
-      <label>Parent Function
-        <select name="parent_id">
-          <option value="">— none (top level) —</option>
-          {% for f in all_functions %}
-          <option value="{{ f.id }}">{{ f.name }}</option>
-          {% endfor %}
-        </select>
-      </label>
-    </div>
-    <div class="grid">
-      <label>Emergency Representative
-        <select name="emergency_rep_id">
-          <option value="">— none —</option>
-          {% for f in all_functions %}
-          <option value="{{ f.id }}">{{ f.name }}</option>
-          {% endfor %}
-        </select>
-      </label>
-    </div>
-    <label>Description
-      <textarea name="description" rows="2" placeholder="Describe the function…"></textarea>
-    </label>
-    <label>Aim
-      <textarea name="aim" rows="2" placeholder="What is the aim of this function?"></textarea>
-    </label>
-    <button type="submit">Add Function</button>
-  </form>
-</details>
-
 <table>
   <thead>
     <tr>
@@ -80,4 +44,40 @@
     {% endfor %}
   </tbody>
 </table>
+
+<details open style="margin-top:2.5rem">
+  <summary><h2>Add New Function</h2></summary>
+  <form hx-post="/functions" hx-target="#fn-tbody" hx-swap="beforeend" hx-on::after-request="this.reset(); const e=document.getElementById('fn-empty'); if(e) e.remove()">
+    <div class="grid">
+      <label>Name *
+        <input type="text" name="name" required placeholder="e.g. Project Manager" />
+      </label>
+      <label>Parent Function
+        <select name="parent_id">
+          <option value="">— none (top level) —</option>
+          {% for f in all_functions %}
+          <option value="{{ f.id }}">{{ f.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="grid">
+      <label>Emergency Representative
+        <select name="emergency_rep_id">
+          <option value="">— none —</option>
+          {% for f in all_functions %}
+          <option value="{{ f.id }}">{{ f.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <label>Description
+      <textarea name="description" rows="2" placeholder="Describe the function…"></textarea>
+    </label>
+    <label>Aim
+      <textarea name="aim" rows="2" placeholder="What is the aim of this function?"></textarea>
+    </label>
+    <button type="submit">Add Function</button>
+  </form>
+</details>
 {% endblock %}
