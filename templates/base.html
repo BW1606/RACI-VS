@@ -33,6 +33,24 @@
                   <button type="submit">+</button>
                 </form>
               </li>
+              <li><hr style="margin:0.4rem 0" /></li>
+              <li>
+                <a href="/organisations/export" style="display:block;padding:0.2rem 0">
+                  &#x2B07; Export current org
+                </a>
+              </li>
+              <li>
+                <form method="post" action="/organisations/import"
+                      enctype="multipart/form-data"
+                      class="org-import-form">
+                  <label style="font-size:0.85rem;margin:0">
+                    &#x2B06; Import org (.json)
+                    <input type="file" name="file" accept=".json" required
+                           onchange="this.form.submit()"
+                           style="margin-top:0.2rem;font-size:0.8rem" />
+                  </label>
+                </form>
+              </li>
             </ul>
           </details>
         </li>

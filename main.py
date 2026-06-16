@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 import models
 from database import Base, engine, get_db
 from dependencies import get_org_context
-from routers import assignments, documents, functions, tasks
+from routers import assignments, documents, functions, organisations, tasks
 from routers.documents import get_shared_tasks
 from models import DEFAULT_ORG_NAME, Function, FunctionTaskRole, Organisation, Task
 
@@ -138,6 +138,7 @@ app.include_router(functions.router)
 app.include_router(tasks.router)
 app.include_router(assignments.router)
 app.include_router(documents.router)
+app.include_router(organisations.router)
 
 templates = Jinja2Templates(directory="templates")
 

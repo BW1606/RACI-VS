@@ -12,6 +12,7 @@ A locally-running web app for managing RACI-VS responsibility matrices across co
 - **Organisation chart** — visual top-down hierarchy diagram of all functions in the active organisation, based on parent-function relationships
 - **Interface analysis** — select any two functions to see the tasks they share and their respective roles
 - **Document preview & export** — view function descriptions, task descriptions, and interface reports directly in the browser as a formatted HTML page (opens in a new tab); download as `.docx` for Word or LibreOffice; or use the browser's print dialog to save as PDF
+- **Organisation export / import** — back up the active organisation or share it with a colleague as a single `.json` file; importing creates a new, fully independent copy (functions with their hierarchy, tasks, and all role assignments are restored; if the name already exists a numeric suffix is added automatically)
 
 ## Tech Stack
 
@@ -95,6 +96,33 @@ Go to **Organisation** in the navigation bar. Functions are displayed as a top-d
 
 Go to **Interface**, select two functions, and click **Show Interface**. The page displays every task both functions are involved in, with their respective roles side by side.
 
+## Organisation Export & Import
+
+The active organisation can be exported as a portable `.json` file and imported on any machine running the app.
+
+**To export:** open the org-switcher dropdown in the top-left of the nav bar and click **⬇ Export current org**. The browser downloads `<org-name>_export.json`.
+
+**To import:** click **⬆ Import org (.json)** in the same dropdown and pick a previously exported file. The file is uploaded immediately (no separate submit button). A new organisation is created with all the original functions (including parent hierarchy and emergency-representative links), tasks, and role assignments. If an organisation with the same name already exists, a suffix is appended (e.g. *MyOrg (2)*), and the imported org becomes the active one.
+
+The `.json` format is human-readable and version-tagged:
+
+```json
+{
+  "version": "1.0",
+  "organisation": { "name": "MyOrg" },
+  "functions": [
+    { "ref": "f1", "name": "CEO", "description": "", "aim": "",
+      "parent_ref": null, "emergency_rep_ref": null }
+  ],
+  "tasks": [
+    { "ref": "t1", "title": "Budgetplanung", "description": "" }
+  ],
+  "assignments": [
+    { "function_ref": "f1", "task_ref": "t1", "role": "A", "r_subcategory": null }
+  ]
+}
+```
+
 ## Document Preview & Export
 
 Each document page has two buttons: **Vorschau** opens an HTML preview in a new browser tab, and **Download .docx** downloads the same content as a Word file. The preview page has a **Drucken / PDF** button that triggers the browser's print dialog — use "Save as PDF" to export without downloading a `.docx`.
@@ -148,7 +176,8 @@ RACI-VS/
 │   ├── functions.py          # Function CRUD endpoints (org-scoped)
 │   ├── tasks.py              # Task CRUD endpoints (org-scoped)
 │   ├── assignments.py        # Role assignment endpoints
-│   └── documents.py          # .docx download endpoints (org-scoped)
+│   ├── documents.py          # .docx download endpoints (org-scoped)
+│   └── organisations.py      # Organisation export and import endpoints
 ├── services/
 │   └── docx_generator.py     # All Word document generation logic
 ├── static/
