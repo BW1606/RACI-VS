@@ -1,6 +1,8 @@
 # RACI-VS Matrix Manager
 
-A locally-running web app for managing RACI-VS responsibility matrices across company functions and tasks, with Word document export. Supports multiple independent organisations in a single database.
+A web app for managing RACI-VS responsibility matrices across company functions and tasks, with Word document export. Supports multiple independent organisations in a single database.
+
+Available as a **Windows desktop app** (no Python or terminal required for end users) and as a standard Python/FastAPI server for developers.
 
 ## Features
 
@@ -24,30 +26,55 @@ A locally-running web app for managing RACI-VS responsibility matrices across co
 | Styling | PicoCSS |
 | Database | SQLite + SQLAlchemy |
 | Document generation | python-docx |
+| Desktop packaging | PyInstaller + pystray + Pillow |
 
-No Node.js or build step required.
+No Node.js required.
 
-## Prerequisites
+## Installation & Running
 
-- Python 3.11 or newer
+### End users — Windows desktop app
 
-## Installation
+Download `RACI-VS_Setup.exe` from the [Releases page](https://github.com/BW1606/RACI-VS/releases) and run it. The installer creates a Start Menu entry and an optional Desktop shortcut. No Python or command-line tools needed.
+
+Launch the app from the Desktop shortcut or Start Menu. A tray icon appears in the Windows taskbar notification area and the browser opens automatically to the app. Right-click the tray icon for **Open RACI-VS** and **Quit** options.
+
+The database is stored in `%APPDATA%\RACI-VS\raci_vs.db` and is preserved across app updates.
+
+### Developers — run from source
 
 ```bash
 git clone https://github.com/BW1606/RACI-VS.git
 cd RACI-VS
+git checkout feature/desktop-app
 pip install -r requirements.txt
 ```
 
-## Running
+**Run with the desktop launcher** (system tray + auto-open browser):
+```bash
+python launcher.py
+```
 
+**Run as a development server** (hot-reload, no tray icon):
 ```bash
 uvicorn main:app --reload
 ```
-
 Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-The SQLite database (`raci_vs.db`) is created automatically on first run.
+## Building the Installer
+
+To produce a distributable `RACI-VS_Setup.exe`, you need Python 3.11+, the project dependencies, and [Inno Setup](https://jrsoftware.org/isinfo.php) installed on your build machine.
+
+**Step 1 — bundle the app with PyInstaller:**
+```bat
+build.bat
+```
+Output: `dist\RACI-VS\` folder containing `RACI-VS.exe` and all dependencies.
+
+**Step 2 — compile the installer:**
+Open [raci_vs.iss](raci_vs.iss) in Inno Setup Compiler and click **Build → Compile**.
+Output: `RACI-VS_Setup.exe` — a self-contained Windows installer ready to distribute.
+
+> **SmartScreen warning:** because the `.exe` is not code-signed, Windows may show a *"Windows protected your PC"* prompt on first run. Click **More info → Run anyway** to proceed. This is expected for unsigned software distributed outside the Microsoft Store.
 
 ## Usage
 
@@ -137,9 +164,15 @@ The `.docx` files are standard Office Open XML and open in Microsoft Word or Lib
 
 ## How it works
 
+### Desktop launcher
+
+`launcher.py` is the entry point for the packaged Windows app. It starts the FastAPI server (via `uvicorn`) in a background daemon thread, waits 1.5 seconds for the server to bind, then opens the default browser to `http://127.0.0.1:8000`. A `pystray` system-tray icon keeps the process alive and provides **Open** and **Quit** menu items. Quitting calls `os._exit(0)`, which cleanly terminates the daemon thread along with the main process.
+
+When PyInstaller freezes the app, all source files and the `static/` and `templates/` directories are bundled into a temporary extraction folder (`sys._MEIPASS`). `resource_path()` in `main.py` resolves asset paths against `sys._MEIPASS` when frozen and against `__file__` when running from source, so both modes work without any path changes.
+
 ### Database
 
-The app stores everything in a single SQLite file (`raci_vs.db`) managed by SQLAlchemy. There are four tables:
+The app stores everything in a single SQLite file managed by SQLAlchemy. When running as a packaged desktop app the file is stored at `%APPDATA%\RACI-VS\raci_vs.db` (always writable, survives updates). When running from source it sits next to `database.py` as `raci_vs.db`. There are four tables:
 
 - **`organisations`** — one row per named organisation. All functions and tasks belong to exactly one organisation.
 - **`functions`** — one row per organisational function. `organisation_id` scopes each function to its owner. Optional `parent_id` and `emergency_rep_id` are both self-referential foreign keys, enabling arbitrary-depth company hierarchy and emergency coverage chains.
@@ -166,12 +199,15 @@ An assignment is rejected with HTTP 400 if the role is not one of the six valid 
 
 ```
 RACI-VS/
-├── main.py                   # App entry point, startup migrations, dashboard and interface routes
-├── database.py               # SQLAlchemy engine and session
+├── launcher.py               # Desktop entry point: uvicorn thread + browser open + system tray
+├── main.py                   # FastAPI app, startup migrations, dashboard and interface routes
+├── database.py               # SQLAlchemy engine and session (path-aware for frozen builds)
 ├── models.py                 # ORM models: Organisation, Function, Task, FunctionTaskRole
 ├── dependencies.py           # Shared FastAPI dependency: get_org_context (active organisation)
 ├── schemas.py                # Pydantic validation schemas
 ├── requirements.txt
+├── build.bat                 # PyInstaller build script → dist\RACI-VS\RACI-VS.exe
+├── raci_vs.iss               # Inno Setup script → RACI-VS_Setup.exe installer
 ├── routers/
 │   ├── functions.py          # Function CRUD endpoints (org-scoped)
 │   ├── tasks.py              # Task CRUD endpoints (org-scoped)
