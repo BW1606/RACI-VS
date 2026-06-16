@@ -6,6 +6,8 @@ pyinstaller ^
   --name "RACI-VS" ^
   --noconsole ^
   --onedir ^
+  --collect-all uvicorn ^
+  --collect-all anyio ^
   --add-data "static;static" ^
   --add-data "templates;templates" ^
   --add-data "examples;examples" ^

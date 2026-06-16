@@ -9,6 +9,8 @@ Build with build.bat (PyInstaller). For development, run directly:
     python launcher.py
 """
 
+import ctypes
+import logging
 import os
 import sys
 import threading
@@ -22,18 +24,40 @@ from PIL import Image
 PORT = 8000
 URL = f"http://127.0.0.1:{PORT}"
 
+# Log to %APPDATA%\RACI-VS\error.log so problems are diagnosable without a terminal
+_log_dir = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "RACI-VS")
+os.makedirs(_log_dir, exist_ok=True)
+logging.basicConfig(
+    filename=os.path.join(_log_dir, "error.log"),
+    level=logging.ERROR,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+
+
+def _alert(message: str) -> None:
+    """Show a Windows error popup — no terminal required."""
+    ctypes.windll.user32.MessageBoxW(0, message, "RACI-VS — Startup Error", 0x10)
+
 
 def _run_server() -> None:
-    uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_level="warning")
+    try:
+        uvicorn.run("main:app", host="127.0.0.1", port=PORT, log_level="warning")
+    except Exception as exc:
+        logging.exception("Server failed to start")
+        _alert(
+            f"The server failed to start and the app cannot run.\n\n"
+            f"Error: {exc}\n\n"
+            f"Full details: {os.path.join(_log_dir, 'error.log')}"
+        )
+        os._exit(1)
 
 
 def _open_browser() -> None:
-    time.sleep(1.5)  # give uvicorn time to bind the port
+    time.sleep(2.0)  # give uvicorn time to bind the port
     webbrowser.open(URL)
 
 
 def _make_tray_image() -> Image.Image:
-    """Generate a simple coloured square as the tray icon."""
     img = Image.new("RGB", (64, 64), color=(0, 102, 204))
     return img
 
@@ -44,7 +68,7 @@ def _on_open(_icon: pystray.Icon, _item: pystray.MenuItem) -> None:
 
 def _on_quit(icon: pystray.Icon, _item: pystray.MenuItem) -> None:
     icon.stop()
-    os._exit(0)  # kills the daemon uvicorn thread cleanly
+    os._exit(0)
 
 
 def main() -> None:
