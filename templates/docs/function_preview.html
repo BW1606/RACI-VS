@@ -21,7 +21,7 @@
 <p><strong>Untergeordnete Funktion:</strong> {{ children_names }}</p>
 
 <h2>2. Ziel der Funktion</h2>
-<p style="white-space:pre-wrap">{{ fn.aim or "—" }}</p>
+<p style="white-space:pre-wrap">{{ fn.purpose or "—" }}</p>
 
 <h2>3. Ergebnisverantwortung (A)</h2>
 {% if by_role.A %}
@@ -81,7 +81,7 @@
 <ul><li><em>Details ergänzen</em></li></ul>
 {% endif %}
 
-<h2>8. Befugnisse (Signaturverantwortung S)</h2>
+<h2>8. Signaturverantwortung (S)</h2>
 {% if by_role.S %}
 <ul>
   {% for tr in by_role.S %}
@@ -89,10 +89,13 @@
   {% endfor %}
 </ul>
 {% else %}
-<ul><li>Siehe Geschäftsordnung (GO)</li></ul>
+<ul><li><em>Details ergänzen</em></li></ul>
 {% endif %}
 
-<h2>9. Vertretung</h2>
+<h2>9. Befugnisse</h2>
+<p style="white-space:pre-wrap">{{ fn.befugnisse or "—" }}</p>
+
+<h2>10. Vertretung</h2>
 <p><strong>Vertretung von:</strong>
 {% if fn.emergency_rep %}
   <a href="/functions/{{ fn.emergency_rep.id }}">{{ fn.emergency_rep.name }}</a>

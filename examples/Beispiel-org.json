@@ -8,7 +8,8 @@
       "ref": "f3",
       "name": "Projektmanager",
       "description": "managed projekte",
-      "purpose":"XYZ",
+      "purpose": "XYZ",
+      "befugnisse": "Zeichnungsberechtigung bis 50.000 EUR",
       "parent_ref": "f6",
       "emergency_rep_ref": null
     },
@@ -16,7 +17,8 @@
       "ref": "f4",
       "name": "Entwickler (Dev)",
       "description": "entwickelt",
-      "purpose":"import Claude Code:\r\n'pls fix bug '",
+      "purpose": "import Claude Code:\r\n'pls fix bug '",
+      "befugnisse": "",
       "parent_ref": "f3",
       "emergency_rep_ref": null
     },
@@ -24,7 +26,8 @@
       "ref": "f5",
       "name": "Tester (QA)",
       "description": "Testet QA",
-      "purpose":"'all full of bugs'",
+      "purpose": "'all full of bugs'",
+      "befugnisse": "",
       "parent_ref": "f3",
       "emergency_rep_ref": "f4"
     },
@@ -32,7 +35,8 @@
       "ref": "f6",
       "name": "Stakeholder (SH)",
       "description": "Holds Stakes",
-      "purpose":"Will geld machen",
+      "purpose": "Will geld machen",
+      "befugnisse": "Vollzeichnungsberechtigung",
       "parent_ref": null,
       "emergency_rep_ref": null
     }
