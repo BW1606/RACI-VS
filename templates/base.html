@@ -29,14 +29,14 @@
               <li><hr style="margin:0.4rem 0" /></li>
               <li>
                 <form method="post" action="/organisations" class="org-create-form">
-                  <input name="name" placeholder="New organisation…" required />
+                  <input name="name" placeholder="{{ t.org_new_placeholder }}" required />
                   <button type="submit">+</button>
                 </form>
               </li>
               <li><hr style="margin:0.4rem 0" /></li>
               <li>
                 <a href="/organisations/export" style="display:block;padding:0.2rem 0">
-                  &#x2B07; Export current org
+                  {{ t.org_export }}
                 </a>
               </li>
               <li>
@@ -44,7 +44,7 @@
                       enctype="multipart/form-data"
                       class="org-import-form">
                   <label style="font-size:0.85rem;margin:0">
-                    &#x2B06; Import org (.json)
+                    {{ t.org_import }}
                     <input type="file" name="file" accept=".json" required
                            onchange="this.form.submit()"
                            style="margin-top:0.2rem;font-size:0.8rem" />
@@ -56,11 +56,24 @@
         </li>
       </ul>
       <ul>
-        <li><a href="/">Matrix</a></li>
-        <li><a href="/functions">Functions</a></li>
-        <li><a href="/tasks">Tasks</a></li>
-        <li><a href="/interface">Interface</a></li>
-        <li><a href="/organisation">Organisation</a></li>
+        <li><a href="/">{{ t.nav_matrix }}</a></li>
+        <li><a href="/functions">{{ t.nav_functions }}</a></li>
+        <li><a href="/tasks">{{ t.nav_tasks }}</a></li>
+        <li><a href="/interface">{{ t.nav_interface }}</a></li>
+        <li><a href="/organisation">{{ t.nav_organisation }}</a></li>
+        <li>
+          <form method="post" action="/set-language" id="lang-form"
+                style="display:flex;align-items:center;gap:0.4rem;margin:0">
+            <input type="hidden" name="referer" value="{{ request.url.path }}" />
+            <input type="hidden" name="lang" id="lang-value" value="{{ 'en' if lang == 'de' else 'de' }}" />
+            <span style="font-size:0.85rem">EN</span>
+            <input type="checkbox" role="switch"
+              {% if lang == "de" %}checked{% endif %}
+              onchange="document.getElementById('lang-value').value=this.checked?'de':'en';document.getElementById('lang-form').submit()"
+              style="margin:0" />
+            <span style="font-size:0.85rem">DE</span>
+          </form>
+        </li>
       </ul>
     </nav>
   </header>

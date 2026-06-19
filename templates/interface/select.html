@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Interface — RACI-VS{% endblock %}
 {% block content %}
-<h2>Function Interface</h2>
-<p>Select two functions to view the tasks they share and download the interface document.</p>
+<h2>{{ t.iface_heading }}</h2>
+<p>{{ t.iface_intro }}</p>
 
 <form method="get" action="/interface/result">
   <div class="grid">
-    <label>Function A
+    <label>{{ t.iface_fn_a }}
       <select name="f1" required>
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for f in functions %}
         <option value="{{ f.id }}" {% if f1 and f1 == f.id %}selected{% endif %}>{{ f.name }}</option>
         {% endfor %}
       </select>
     </label>
-    <label>Function B
+    <label>{{ t.iface_fn_b }}
       <select name="f2" required>
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for f in functions %}
         <option value="{{ f.id }}" {% if f2 and f2 == f.id %}selected{% endif %}>{{ f.name }}</option>
         {% endfor %}
       </select>
     </label>
   </div>
-  <button type="submit">Show Interface</button>
+  <button type="submit">{{ t.iface_show_btn }}</button>
 </form>
 
 {% if f1_name and f2_name %}
@@ -31,8 +31,8 @@
 <div style="display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap">
   <h3 style="margin:0">{{ f1_name }} ↔ {{ f2_name }}</h3>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-    <a href="/docs/interface/{{ f1 }}/{{ f2 }}/preview" role="button" class="outline" target="_blank">Vorschau</a>
-    <a href="/docs/interface/{{ f1 }}/{{ f2 }}" role="button" class="outline secondary">Download .docx</a>
+    <a href="/docs/interface/{{ f1 }}/{{ f2 }}/preview" role="button" class="outline" target="_blank">{{ t.preview_btn }}</a>
+    <a href="/docs/interface/{{ f1 }}/{{ f2 }}" role="button" class="outline secondary">{{ t.download_docx }}</a>
   </div>
 </div>
 
@@ -40,10 +40,10 @@
 <table style="margin-top:1rem">
   <thead>
     <tr>
-      <th>Task</th>
-      <th>Role of {{ f1_name }}</th>
-      <th>Role of {{ f2_name }}</th>
-      <th>Task Description</th>
+      <th>{{ t.iface_task_col }}</th>
+      <th>{{ t.iface_role_of }} {{ f1_name }}</th>
+      <th>{{ t.iface_role_of }} {{ f2_name }}</th>
+      <th>{{ t.iface_task_desc_col }}</th>
     </tr>
   </thead>
   <tbody>
@@ -58,7 +58,7 @@
   </tbody>
 </table>
 {% else %}
-<p style="color:var(--pico-muted-color);margin-top:1rem">These two functions share no tasks.</p>
+<p style="color:var(--pico-muted-color);margin-top:1rem">{{ t.iface_no_shared }}</p>
 {% endif %}
 {% endif %}
 {% endblock %}

@@ -58,7 +58,7 @@ class Function(Base):
     organisation_id: Mapped[int] = mapped_column(Integer, ForeignKey("organisations.id"), nullable=False)
     parent_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     description: Mapped[str] = mapped_column(Text, default="")
-    aim: Mapped[str] = mapped_column(Text, default="")
+    purpose: Mapped[str] = mapped_column(Text, default="")
     emergency_rep_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("functions.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

@@ -34,7 +34,7 @@ def create_function(
     name: str = Form(...),
     parent_id: str | None = Form(None),
     description: str = Form(""),
-    aim: str = Form(""),
+    purpose: str = Form(""),
     emergency_rep_id: str | None = Form(None),
     db: Session = Depends(get_db),
     org_ctx: dict = Depends(get_org_context),
@@ -47,7 +47,7 @@ def create_function(
         organisation_id=current_org_id,
         parent_id=int(parent_id) if parent_id else None,
         description=description,
-        aim=aim,
+        purpose=purpose,
         emergency_rep_id=int(emergency_rep_id) if emergency_rep_id else None,
     )
     db.add(fn)
@@ -126,7 +126,7 @@ def edit_function(
     name: str = Form(...),
     parent_id: str | None = Form(None),
     description: str = Form(""),
-    aim: str = Form(""),
+    purpose: str = Form(""),
     emergency_rep_id: str | None = Form(None),
     db: Session = Depends(get_db),
     org_ctx: dict = Depends(get_org_context),
@@ -138,7 +138,7 @@ def edit_function(
     fn.name = name
     fn.parent_id = int(parent_id) if parent_id else None
     fn.description = description
-    fn.aim = aim
+    fn.purpose = purpose
     fn.emergency_rep_id = int(emergency_rep_id) if emergency_rep_id else None
     db.commit()
     db.refresh(fn)

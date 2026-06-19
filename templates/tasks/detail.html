@@ -3,7 +3,7 @@
 {% block content %}
 <nav aria-label="breadcrumb">
   <ul>
-    <li><a href="/tasks">Tasks</a></li>
+    <li><a href="/tasks">{{ t.nav_tasks }}</a></li>
     <li>{{ task.title }}</li>
   </ul>
 </nav>
@@ -11,17 +11,17 @@
 <div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
   <h2 style="margin:0">{{ task.title }}</h2>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-    <a href="/docs/task/{{ task.id }}/preview" role="button" class="outline" target="_blank">Vorschau</a>
-    <a href="/docs/task/{{ task.id }}" role="button" class="outline secondary">Download .docx</a>
+    <a href="/docs/task/{{ task.id }}/preview" role="button" class="outline" target="_blank">{{ t.preview_btn }}</a>
+    <a href="/docs/task/{{ task.id }}" role="button" class="outline secondary">{{ t.download_docx }}</a>
   </div>
 </div>
 
-<p style="white-space:pre-wrap">{{ task.description or "No description." }}</p>
+<p style="white-space:pre-wrap">{{ task.description or t.task_no_desc }}</p>
 
-<h3>Assigned Functions &amp; Roles</h3>
+<h3>{{ t.task_assigned_fns }}</h3>
 <table id="assignments-table">
   <thead>
-    <tr><th>Function</th><th>Role</th><th></th></tr>
+    <tr><th>{{ t.task_fn_col }}</th><th>{{ t.task_role_col }}</th><th></th></tr>
   </thead>
   <tbody id="assignment-tbody">
     {% for fr in task.function_roles %}
@@ -33,12 +33,12 @@
           hx-delete="/assignments/{{ fr.id }}"
           hx-target="#assignment-row-{{ fr.id }}"
           hx-swap="outerHTML">
-          Remove
+          {{ t.btn_remove }}
         </button>
       </td>
     </tr>
     {% else %}
-    <tr id="no-assignments"><td colspan="3" style="color:var(--pico-muted-color)">No functions assigned yet.</td></tr>
+    <tr id="no-assignments"><td colspan="3" style="color:var(--pico-muted-color)">{{ t.task_no_assignments }}</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -50,60 +50,52 @@
       hx-on::after-request="this.reset(); taskSubcategoryLabel.style.display='none'; taskRoleSubcategory.required=false; const e=document.getElementById('no-assignments'); if(e) e.remove()">
   <input type="hidden" name="task_id" value="{{ task.id }}" />
   <div class="grid">
-    <label>Function
+    <label>{{ t.task_fn_col }}
       <select name="function_id" required>
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for f in available_functions %}
         <option value="{{ f.id }}">{{ f.name }}</option>
         {% endfor %}
       </select>
     </label>
-    <label>Role
+    <label>{{ t.task_role_col }}
       <select name="role" id="task-role-select" required onchange="
         var sub = document.getElementById('task-subcategory-label');
         var sel = document.getElementById('task-role-subcategory');
         if (this.value === 'R') { sub.style.display=''; sel.required=true; }
         else { sub.style.display='none'; sel.required=false; sel.value=''; }
       ">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for r in roles %}
-        <option value="{{ r }}">{{ r }}
-          {% if r == "R" %} — Responsible
-          {% elif r == "A" %} — Accountable
-          {% elif r == "C" %} — Consulted
-          {% elif r == "I" %} — Informed
-          {% elif r == "V" %} — Verificator
-          {% elif r == "S" %} — Signator
-          {% endif %}
-        </option>
+        <option value="{{ r }}">{{ r }} — {{ t["role_" ~ r] }}</option>
         {% endfor %}
       </select>
     </label>
-    <label id="task-subcategory-label" style="display:none">Subcategory
+    <label id="task-subcategory-label" style="display:none">{{ t.role_subcategory }}
       <select name="r_subcategory" id="task-role-subcategory">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for s in r_subcategories %}
         <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
       </select>
     </label>
     <div style="display:flex;align-items:flex-end">
-      <button type="submit" style="width:100%">Assign</button>
+      <button type="submit" style="width:100%">{{ t.btn_assign }}</button>
     </div>
   </div>
 </form>
 {% else %}
-<p style="color:var(--pico-muted-color);font-size:0.9rem">All available functions are already assigned to this task.</p>
+<p style="color:var(--pico-muted-color);font-size:0.9rem">{{ t.task_all_assigned }}</p>
 {% endif %}
 
-<h3>Edit Task</h3>
+<h3>{{ t.task_edit_heading }}</h3>
 <form method="post" action="/tasks/{{ task.id }}/edit">
-  <label>Title *
+  <label>{{ t.task_title }} *
     <input type="text" name="title" value="{{ task.title }}" required />
   </label>
-  <label>Description
+  <label>{{ t.task_description }}
     <textarea name="description" rows="3">{{ task.description }}</textarea>
   </label>
-  <button type="submit">Save Changes</button>
+  <button type="submit">{{ t.btn_save }}</button>
 </form>
 {% endblock %}

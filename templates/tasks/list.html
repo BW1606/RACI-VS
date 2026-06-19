@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Tasks — RACI-VS{% endblock %}
 {% block content %}
-<h2>Tasks</h2>
+<h2>{{ t.task_list_heading }}</h2>
 
 <table>
   <thead>
     <tr>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Functions Involved</th>
+      <th>{{ t.task_title }}</th>
+      <th>{{ t.task_description }}</th>
+      <th>{{ t.task_col_involved }}</th>
       <th></th>
     </tr>
   </thead>
@@ -23,67 +23,59 @@
           hx-delete="/tasks/{{ task.id }}"
           hx-target="#task-row-{{ task.id }}"
           hx-swap="outerHTML"
-          hx-confirm="Delete '{{ task.title }}'? This also removes all its role assignments.">
-          Delete
+          hx-confirm="{{ t.task_delete_confirm | replace('%s', task.title) }}">
+          {{ t.btn_delete }}
         </button>
       </td>
     </tr>
     {% else %}
-    <tr id="task-empty"><td colspan="4" style="text-align:center;color:var(--pico-muted-color)">No tasks yet.</td></tr>
+    <tr id="task-empty"><td colspan="4" style="text-align:center;color:var(--pico-muted-color)">{{ t.task_empty }}</td></tr>
     {% endfor %}
   </tbody>
 </table>
 
 <details open style="margin-top:2.5rem">
-  <summary><h2>Add New Task</h2></summary>
+  <summary><h2>{{ t.task_add_heading }}</h2></summary>
   <form hx-post="/tasks" hx-target="#task-tbody" hx-swap="beforeend"
         hx-on::after-request="if(event.detail.successful){this.reset();document.getElementById('fn-rows-container').innerHTML=''}">
-    <label>Title *
-      <input type="text" name="title" required placeholder="e.g. Annual Budget Approval" />
+    <label>{{ t.task_title }} *
+      <input type="text" name="title" required placeholder="{{ t.task_title_placeholder }}" />
     </label>
-    <label>Description
-      <textarea name="description" rows="2" placeholder="Describe what this task involves…"></textarea>
+    <label>{{ t.task_description }}
+      <textarea name="description" rows="2" placeholder="{{ t.task_desc_placeholder }}"></textarea>
     </label>
 
-    <p style="margin-bottom:0.25rem"><strong>Function Assignments</strong> <span style="font-weight:normal;color:var(--pico-muted-color)">(optional)</span></p>
+    <p style="margin-bottom:0.25rem"><strong>{{ t.task_fn_assignments }}</strong> <span style="font-weight:normal;color:var(--pico-muted-color)">{{ t.task_optional }}</span></p>
     <div id="fn-rows-container"></div>
     {% if functions %}
-    <button type="button" class="outline" style="margin-bottom:1rem" onclick="addFunctionRow()">+ Add Function</button>
+    <button type="button" class="outline" style="margin-bottom:1rem" onclick="addFunctionRow()">{{ t.task_add_fn_btn }}</button>
     {% endif %}
 
-    <button type="submit">Add Task</button>
+    <button type="submit">{{ t.task_add_btn }}</button>
   </form>
 </details>
 
 <template id="fn-row-template">
   <div class="fn-assignment-row" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.5rem;align-items:end;margin-bottom:0.5rem">
-    <label style="margin:0">Function
+    <label style="margin:0">{{ t.task_fn_label }}
       <select name="function_ids" required>
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for f in functions %}
         <option value="{{ f.id }}">{{ f.name }}</option>
         {% endfor %}
       </select>
     </label>
-    <label style="margin:0">Role
+    <label style="margin:0">{{ t.task_role_label }}
       <select name="roles" required onchange="onFnRoleChange(this)">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for r in roles %}
-        <option value="{{ r }}">{{ r }}
-          {% if r == "R" %} — Responsible
-          {% elif r == "A" %} — Accountable
-          {% elif r == "C" %} — Consulted
-          {% elif r == "I" %} — Informed
-          {% elif r == "V" %} — Verificator
-          {% elif r == "S" %} — Signator
-          {% endif %}
-        </option>
+        <option value="{{ r }}">{{ r }} — {{ t["role_" ~ r] }}</option>
         {% endfor %}
       </select>
     </label>
-    <label class="sub-label" style="margin:0;display:none">Subcategory
+    <label class="sub-label" style="margin:0;display:none">{{ t.role_subcategory }}
       <select name="r_subcategories">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for s in r_subcategories %}
         <option value="{{ s }}">{{ s }}</option>
         {% endfor %}

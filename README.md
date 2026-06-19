@@ -5,7 +5,7 @@ A locally-running web app for managing RACI-VS responsibility matrices across co
 ## Features
 
 - **Multi-organisation support** — create any number of named organisations; each has its own isolated set of functions, tasks, and assignments. Switch between them from the nav bar; new organisations start completely empty.
-- **Function management** — create functions with company hierarchy, description, aim, and emergency representative
+- **Function management** — create functions with company hierarchy, description, purpose, and emergency representative
 - **Task management** — create tasks with descriptions and assign functions to them with RACI-VS roles
 - **R-role subcategory** — Responsible (R) assignments carry one of five subcategories (Ausführende Tätigkeit, Gewährleistung, Koordination, Veranlassung, Mitwirkung); visible in the function document, not in the matrix
 - **Matrix view** — live overview table: tasks as rows, functions as columns, with colour-coded role badges
@@ -111,7 +111,7 @@ The `.json` format is human-readable and version-tagged:
   "version": "1.0",
   "organisation": { "name": "MyOrg" },
   "functions": [
-    { "ref": "f1", "name": "CEO", "description": "", "aim": "",
+    { "ref": "f1", "name": "CEO", "description": "", "purpose": "",
       "parent_ref": null, "emergency_rep_ref": null }
   ],
   "tasks": [

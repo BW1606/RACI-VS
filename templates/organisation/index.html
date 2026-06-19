@@ -17,7 +17,7 @@
 </div>
 {% endmacro %}
 
-<h2>Organisation</h2>
+<h2>{{ t.org_heading }}</h2>
 {% if roots %}
 <div class="org-tree">
   {% for root in roots | sort(attribute='name') %}
@@ -25,7 +25,7 @@
   {% endfor %}
 </div>
 {% else %}
-<p>No functions defined yet. <a href="/functions">Add a function</a> to get started.</p>
+<p>{{ t.org_empty | safe }}</p>
 {% endif %}
 
 {% endblock %}
