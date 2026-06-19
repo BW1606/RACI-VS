@@ -7,7 +7,7 @@ Available as a **Windows desktop app** (no Python or terminal required for end u
 ## Features
 
 - **Multi-organisation support** — create any number of named organisations; each has its own isolated set of functions, tasks, and assignments. Switch between them from the nav bar; new organisations start completely empty.
-- **Function management** — create functions with company hierarchy, description, purpose, and emergency representative
+- **Function management** — create functions with company hierarchy, description, purpose, befugnisse (signing authority), and emergency representative
 - **Task management** — create tasks with descriptions and assign functions to them with RACI-VS roles
 - **R-role subcategory** — Responsible (R) assignments carry one of five subcategories (Ausführende Tätigkeit, Gewährleistung, Koordination, Veranlassung, Mitwirkung); visible in the function document, not in the matrix
 - **Matrix view** — live overview table: tasks as rows, functions as columns, with colour-coded role badges
@@ -15,6 +15,8 @@ Available as a **Windows desktop app** (no Python or terminal required for end u
 - **Interface analysis** — select any two functions to see the tasks they share and their respective roles
 - **Document preview & export** — view function descriptions, task descriptions, and interface reports directly in the browser as a formatted HTML page (opens in a new tab); download as `.docx` for Word or LibreOffice; or use the browser's print dialog to save as PDF
 - **Organisation export / import** — back up the active organisation or share it with a colleague as a single `.json` file; importing creates a new, fully independent copy (functions with their hierarchy, tasks, and all role assignments are restored; if the name already exists a numeric suffix is added automatically)
+- **EN / DE language toggle** — switch the entire UI between English and German at any time via the toggle in the nav bar; the selection persists across page loads
+- **Exit button** — a one-click **Exit / Beenden** button in the nav bar shuts down the server and all background processes cleanly; a confirmation prompt prevents accidental clicks
 
 ## Tech Stack
 
@@ -86,7 +88,8 @@ Go to **Functions** in the navigation bar. Click **Add New Function** and fill i
 - **Parent Function** — select a parent to place this function in the company hierarchy
 - **Emergency Representative** — which function covers this one in an emergency
 - **Description** — what the function does
-- **Aim** — the purpose of this function
+- **Purpose** — the purpose of this function
+- **Befugnisse** — signing authority or authorisation limits (free text, e.g. *Zeichnungsberechtigung bis 50.000 EUR*)
 
 Functions can be deleted from the list. Deleting a function removes all its role assignments.
 
@@ -138,7 +141,7 @@ The `.json` format is human-readable and version-tagged:
   "version": "1.0",
   "organisation": { "name": "MyOrg" },
   "functions": [
-    { "ref": "f1", "name": "CEO", "description": "", "purpose": "",
+    { "ref": "f1", "name": "CEO", "description": "", "purpose": "", "befugnisse": "",
       "parent_ref": null, "emergency_rep_ref": null }
   ],
   "tasks": [
@@ -156,7 +159,7 @@ Each document page has two buttons: **Vorschau** opens an HTML preview in a new 
 
 | Page | Document contents |
 |---|---|
-| Function detail | Structured 9-section **Funktionsbeschreibung**: Organisatorische Einordnung, Ziel der Funktion, Ergebnisverantwortung (A), Durchführungsverantwortung (R) grouped by subcategory heading, Beratungsverantwortung (C), Informationsverantwortung (I), Verifikationsverantwortung (V), Befugnisse (S), Vertretung. Sections with no assignments show an italic "Details ergänzen" placeholder. |
+| Function detail | Structured 10-section **Funktionsbeschreibung**: Organisatorische Einordnung, Ziel der Funktion, Ergebnisverantwortung (A), Durchführungsverantwortung (R) grouped by subcategory heading, Beratungsverantwortung (C), Informationsverantwortung (I), Verifikationsverantwortung (V), Signaturverantwortung (S), Befugnisse, Vertretung. Sections with no assignments show an italic "Details ergänzen" placeholder. |
 | Task detail | Task title, description, and a table of all assigned functions with their roles and hierarchy |
 | Interface page | Interface header and a table of shared tasks with the role of each function |
 
@@ -193,7 +196,7 @@ An assignment is rejected with HTTP 400 if the role is not one of the six valid 
 
 ### Document generation
 
-`.docx` files are built entirely in memory by `python-docx`, receiving data directly from the ORM objects. The result is a `BytesIO` buffer that is streamed to the browser as a file download — nothing is written to disk. The function description follows a fixed 9-section structure; any section that has no assigned tasks receives an italic "Details ergänzen" placeholder so the document always matches the expected company template format.
+`.docx` files are built entirely in memory by `python-docx`, receiving data directly from the ORM objects. The result is a `BytesIO` buffer that is streamed to the browser as a file download — nothing is written to disk. The function description follows a fixed 10-section structure; any section that has no assigned tasks receives an italic "Details ergänzen" placeholder so the document always matches the expected company template format.
 
 ## Project Structure
 

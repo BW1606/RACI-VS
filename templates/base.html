@@ -74,6 +74,15 @@
             <span style="font-size:0.85rem">DE</span>
           </form>
         </li>
+        <li>
+          <form method="post" action="/shutdown"
+                onsubmit="return confirm('RACI-VS wirklich beenden?')">
+            <button type="submit" class="outline secondary"
+                    style="padding:0.2rem 0.7rem;font-size:0.85rem">
+              ✕ {{ t.btn_quit }}
+            </button>
+          </form>
+        </li>
       </ul>
     </nav>
   </header>

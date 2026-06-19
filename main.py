@@ -1,5 +1,7 @@
 import os
 import sys
+import threading
+import time
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -10,6 +12,7 @@ from sqlalchemy.orm import Session
 
 import models
 from database import Base, engine, get_db
+from translations import TRANSLATIONS, SUPPORTED_LANGS, DEFAULT_LANG
 
 
 def resource_path(relative: str) -> str:
@@ -178,6 +181,39 @@ app.include_router(tasks.router)
 app.include_router(assignments.router)
 app.include_router(documents.router)
 app.include_router(organisations.router)
+
+
+@app.post("/shutdown", response_class=HTMLResponse)
+def shutdown(request: Request):
+    lang = request.cookies.get("lang", DEFAULT_LANG)
+    if lang not in SUPPORTED_LANGS:
+        lang = DEFAULT_LANG
+    t = TRANSLATIONS[lang]
+
+    def _delayed_exit():
+        time.sleep(0.6)
+        os._exit(0)
+    threading.Thread(target=_delayed_exit, daemon=True).start()
+
+    return HTMLResponse(f"""<!doctype html>
+<html lang="{lang}"><head><meta charset="utf-8">
+<title>{t["shutdown_title"]}</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{{font-family:sans-serif;display:flex;flex-direction:column;
+       align-items:center;justify-content:center;height:100vh;margin:0;
+       background:#f8f9fa;color:#333}}
+  h1{{font-size:1.4rem;margin-bottom:.5rem}}
+  p{{color:#666;margin-bottom:.75rem}}
+  kbd{{background:#e9ecef;border:1px solid #adb5bd;border-radius:3px;
+       padding:.1rem .35rem;font-size:.9rem}}
+</style>
+</head><body>
+<h1>{t["shutdown_title"]}</h1>
+<p>{t["shutdown_body"]}</p>
+<p>{t["shutdown_close_hint"]}</p>
+<script>setTimeout(()=>window.close(),800);</script>
+</body></html>""")
 
 templates = Jinja2Templates(directory=resource_path("templates"))
 

@@ -101,6 +101,11 @@ TRANSLATIONS = {
         "iface_role_of":      "Role of",
         "iface_task_desc_col":"Task Description",
         "iface_no_shared":    "These two functions share no tasks.",
+        # Shutdown page
+        "btn_quit":             "Exit",
+        "shutdown_title":       "RACI-VS terminated",
+        "shutdown_body":        "The server has stopped. You can now close this tab.",
+        "shutdown_close_hint":  "Press Ctrl+W (or Cmd+W on Mac) to close the tab.",
     },
     "de": {
         # Navigation
@@ -201,5 +206,10 @@ TRANSLATIONS = {
         "iface_role_of":      "Rolle von",
         "iface_task_desc_col":"Aufgabenbeschreibung",
         "iface_no_shared":    "Diese zwei Funktionen teilen keine Aufgaben.",
+        # Shutdown page
+        "btn_quit":             "Beenden",
+        "shutdown_title":       "RACI-VS wurde beendet",
+        "shutdown_body":        "Der Server ist gestoppt. Sie können diesen Tab jetzt schließen.",
+        "shutdown_close_hint":  "Drücken Sie Ctrl+W (bzw. Cmd+W auf dem Mac), um den Tab zu schließen.",
     },
 }
