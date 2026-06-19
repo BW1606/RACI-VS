@@ -7,8 +7,8 @@
       hx-delete="/tasks/{{ task.id }}"
       hx-target="#task-row-{{ task.id }}"
       hx-swap="outerHTML"
-      hx-confirm="Delete '{{ task.title }}'? This also removes all its role assignments.">
-      Delete
+      hx-confirm="{{ t.task_delete_confirm | replace('%s', task.title) }}">
+      {{ t.btn_delete }}
     </button>
   </td>
 </tr>

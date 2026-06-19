@@ -8,7 +8,7 @@ class FunctionCreate(BaseModel):
     name: str
     parent_id: int | None = None
     description: str = ""
-    aim: str = ""
+    purpose: str = ""
     emergency_rep_id: int | None = None
 
 

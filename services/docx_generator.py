@@ -72,7 +72,7 @@ def generate_function_description(fn) -> BytesIO:
 
     # 2. Ziel der Funktion
     doc.add_heading("2. Ziel der Funktion", level=2)
-    doc.add_paragraph(fn.aim or "—")
+    doc.add_paragraph(fn.purpose or "—")
 
     # Group task_roles by role
     by_role: dict[str, list] = {"A": [], "R": [], "C": [], "I": [], "V": [], "S": []}

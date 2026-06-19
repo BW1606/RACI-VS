@@ -70,7 +70,7 @@ def export_organisation(
                 "ref": fn_ref[f.id],
                 "name": f.name,
                 "description": f.description or "",
-                "aim": f.aim or "",
+                "purpose": f.purpose or "",
                 "parent_ref": fn_ref.get(f.parent_id) if f.parent_id else None,
                 "emergency_rep_ref": fn_ref.get(f.emergency_rep_id) if f.emergency_rep_id else None,
             }
@@ -143,7 +143,7 @@ async def import_organisation(
                 name=name,
                 organisation_id=new_org.id,
                 description=fn_data.get("description", ""),
-                aim=fn_data.get("aim", ""),
+                purpose=fn_data.get("purpose", fn_data.get("aim", "")),
                 parent_id=None,
                 emergency_rep_id=None,
             )

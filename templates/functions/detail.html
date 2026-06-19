@@ -3,7 +3,7 @@
 {% block content %}
 <nav aria-label="breadcrumb">
   <ul>
-    <li><a href="/functions">Functions</a></li>
+    <li><a href="/functions">{{ t.nav_functions }}</a></li>
     <li>{{ fn.name }}</li>
   </ul>
 </nav>
@@ -11,17 +11,17 @@
 <div style="display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
   <h2 style="margin:0">{{ fn.name }}</h2>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-    <a href="/docs/function/{{ fn.id }}/preview" role="button" class="outline" target="_blank">Vorschau</a>
-    <a href="/docs/function/{{ fn.id }}" role="button" class="outline secondary">Download .docx</a>
+    <a href="/docs/function/{{ fn.id }}/preview" role="button" class="outline" target="_blank">{{ t.preview_btn }}</a>
+    <a href="/docs/function/{{ fn.id }}" role="button" class="outline secondary">{{ t.download_docx }}</a>
   </div>
 </div>
 
 <table>
   <tbody>
-    <tr><th>Hierarchy</th><td>{{ hierarchy_path }}</td></tr>
-    <tr><th>Description</th><td style="white-space:pre-wrap">{{ fn.description or "—" }}</td></tr>
-    <tr><th>Aim</th><td style="white-space:pre-wrap">{{ fn.aim or "—" }}</td></tr>
-    <tr><th>Emergency Representative</th><td>
+    <tr><th>{{ t.fn_hierarchy }}</th><td>{{ hierarchy_path }}</td></tr>
+    <tr><th>{{ t.fn_description }}</th><td style="white-space:pre-wrap">{{ fn.description or "—" }}</td></tr>
+    <tr><th>{{ t.fn_purpose }}</th><td style="white-space:pre-wrap">{{ fn.purpose or "—" }}</td></tr>
+    <tr><th>{{ t.fn_emergency }}</th><td>
       {% if fn.emergency_rep %}
         <a href="/functions/{{ fn.emergency_rep.id }}">{{ fn.emergency_rep.name }}</a>
       {% else %}—{% endif %}
@@ -29,10 +29,10 @@
   </tbody>
 </table>
 
-<h3>Tasks &amp; Roles</h3>
+<h3>{{ t.fn_tasks_roles_heading }}</h3>
 <table>
   <thead>
-    <tr><th>Task</th><th>Role</th><th>Task Description</th><th></th></tr>
+    <tr><th>{{ t.fn_task_col }}</th><th>{{ t.fn_role_col }}</th><th>{{ t.fn_task_desc_col }}</th><th></th></tr>
   </thead>
   <tbody id="fn-assignment-tbody">
     {% for tr in fn.task_roles %}
@@ -49,11 +49,11 @@
         <button class="outline secondary" style="padding:0.2rem 0.5rem;font-size:0.8rem"
           hx-delete="/assignments/{{ tr.id }}"
           hx-target="#fn-assignment-row-{{ tr.id }}"
-          hx-swap="outerHTML">Remove</button>
+          hx-swap="outerHTML">{{ t.btn_remove }}</button>
       </td>
     </tr>
     {% else %}
-    <tr id="fn-no-assignments"><td colspan="4" style="color:var(--pico-muted-color)">No task assignments yet.</td></tr>
+    <tr id="fn-no-assignments"><td colspan="4" style="color:var(--pico-muted-color)">{{ t.fn_no_assignments }}</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -65,61 +65,53 @@
       hx-swap="beforeend"
       hx-on::after-request="this.reset(); fnSubcategoryLabel.style.display='none'; fnRoleSubcategory.required=false; const e=document.getElementById('fn-no-assignments'); if(e) e.remove()">
   <div class="grid">
-    <label>Task
+    <label>{{ t.fn_task_col }}
       <select name="task_id" required>
-        <option value="">— select —</option>
-        {% for t in available_tasks %}
-        <option value="{{ t.id }}">{{ t.title }}</option>
+        <option value="">{{ t.select_placeholder }}</option>
+        {% for avail_task in available_tasks %}
+        <option value="{{ avail_task.id }}">{{ avail_task.title }}</option>
         {% endfor %}
       </select>
     </label>
-    <label>Role
+    <label>{{ t.fn_role_col }}
       <select name="role" id="fn-role-select" required onchange="
         var sub = document.getElementById('fn-subcategory-label');
         var sel = document.getElementById('fn-role-subcategory');
         if (this.value === 'R') { sub.style.display=''; sel.required=true; }
         else { sub.style.display='none'; sel.required=false; sel.value=''; }
       ">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for r in roles %}
-        <option value="{{ r }}">{{ r }}
-          {% if r == "R" %} — Responsible
-          {% elif r == "A" %} — Accountable
-          {% elif r == "C" %} — Consulted
-          {% elif r == "I" %} — Informed
-          {% elif r == "V" %} — Verificator
-          {% elif r == "S" %} — Signator
-          {% endif %}
-        </option>
+        <option value="{{ r }}">{{ r }} — {{ t["role_" ~ r] }}</option>
         {% endfor %}
       </select>
     </label>
-    <label id="fn-subcategory-label" style="display:none">Subcategory
+    <label id="fn-subcategory-label" style="display:none">{{ t.role_subcategory }}
       <select name="r_subcategory" id="fn-role-subcategory">
-        <option value="">— select —</option>
+        <option value="">{{ t.select_placeholder }}</option>
         {% for s in r_subcategories %}
         <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
       </select>
     </label>
     <div style="display:flex;align-items:flex-end">
-      <button type="submit" style="width:100%">Assign</button>
+      <button type="submit" style="width:100%">{{ t.btn_assign }}</button>
     </div>
   </div>
 </form>
 {% else %}
-<p style="color:var(--pico-muted-color);font-size:0.9rem">All available tasks are already assigned to this function.</p>
+<p style="color:var(--pico-muted-color);font-size:0.9rem">{{ t.fn_all_assigned }}</p>
 {% endif %}
 
-<h3>Edit Function</h3>
+<h3>{{ t.fn_edit_heading }}</h3>
 <form method="post" action="/functions/{{ fn.id }}/edit">
   <div class="grid">
-    <label>Name *
+    <label>{{ t.fn_name }} *
       <input type="text" name="name" value="{{ fn.name }}" required />
     </label>
-    <label>Parent Function
+    <label>{{ t.fn_parent }}
       <select name="parent_id">
-        <option value="">— none —</option>
+        <option value="">{{ t.none_placeholder }}</option>
         {% for f in all_functions %}
         {% if f.id != fn.id %}
         <option value="{{ f.id }}" {% if fn.parent_id == f.id %}selected{% endif %}>{{ f.name }}</option>
@@ -129,9 +121,9 @@
     </label>
   </div>
   <div class="grid">
-    <label>Emergency Representative
+    <label>{{ t.fn_emergency }}
       <select name="emergency_rep_id">
-        <option value="">— none —</option>
+        <option value="">{{ t.none_placeholder }}</option>
         {% for f in all_functions %}
         {% if f.id != fn.id %}
         <option value="{{ f.id }}" {% if fn.emergency_rep_id == f.id %}selected{% endif %}>{{ f.name }}</option>
@@ -140,12 +132,12 @@
       </select>
     </label>
   </div>
-  <label>Description
+  <label>{{ t.fn_description }}
     <textarea name="description" rows="3">{{ fn.description }}</textarea>
   </label>
-  <label>Aim
-    <textarea name="aim" rows="3">{{ fn.aim }}</textarea>
+  <label>{{ t.fn_purpose }}
+    <textarea name="purpose" rows="3">{{ fn.purpose }}</textarea>
   </label>
-  <button type="submit">Save Changes</button>
+  <button type="submit">{{ t.btn_save }}</button>
 </form>
 {% endblock %}

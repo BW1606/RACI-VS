@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import DEFAULT_ORG_NAME, Organisation
+from translations import DEFAULT_LANG, SUPPORTED_LANGS, TRANSLATIONS
 
 
 def get_org_context(request: Request, db: Session = Depends(get_db)) -> dict:
@@ -19,4 +20,12 @@ def get_org_context(request: Request, db: Session = Depends(get_db)) -> dict:
     except (ValueError, TypeError):
         current_org_id = all_orgs[0].id
     current_org = next((o for o in all_orgs if o.id == current_org_id), all_orgs[0])
-    return {"all_orgs": all_orgs, "current_org": current_org, "current_org_id": current_org.id}
+    lang_cookie = request.cookies.get("lang", DEFAULT_LANG)
+    lang = lang_cookie if lang_cookie in SUPPORTED_LANGS else DEFAULT_LANG
+    return {
+        "all_orgs": all_orgs,
+        "current_org": current_org,
+        "current_org_id": current_org.id,
+        "lang": lang,
+        "t": TRANSLATIONS[lang],
+    }

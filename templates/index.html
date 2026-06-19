@@ -5,14 +5,14 @@
 
 {% if not functions or not tasks %}
 <p style="color:var(--pico-muted-color)">
-  Add <a href="/functions">functions</a> and <a href="/tasks">tasks</a>, then assign roles from the task detail page to populate the matrix.
+  {{ t.matrix_empty | safe }}
 </p>
 {% else %}
 <div class="matrix-table">
   <table>
     <thead>
       <tr>
-        <th class="fn-col">Task</th>
+        <th class="fn-col">{{ t.matrix_task_col }}</th>
         {% for fn in functions %}
         <th title="{{ fn.description }}">
           <a href="/functions/{{ fn.id }}" style="font-size:0.75rem">
@@ -46,14 +46,14 @@
 </div>
 
 <details open style="margin-top:1.5rem">
-  <summary>Role Legend</summary>
+  <summary>{{ t.role_legend }}</summary>
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem">
-    <span class="role-badge role-R">R</span> Responsible &nbsp;
-    <span class="role-badge role-A">A</span> Accountable &nbsp;
-    <span class="role-badge role-C">C</span> Consulted &nbsp;
-    <span class="role-badge role-I">I</span> Informed &nbsp;
-    <span class="role-badge role-V">V</span> Verificator &nbsp;
-    <span class="role-badge role-S">S</span> Signator
+    <span class="role-badge role-R">R</span> {{ t.role_R }} &nbsp;
+    <span class="role-badge role-A">A</span> {{ t.role_A }} &nbsp;
+    <span class="role-badge role-C">C</span> {{ t.role_C }} &nbsp;
+    <span class="role-badge role-I">I</span> {{ t.role_I }} &nbsp;
+    <span class="role-badge role-V">V</span> {{ t.role_V }} &nbsp;
+    <span class="role-badge role-S">S</span> {{ t.role_S }}
   </div>
 </details>
 {% endif %}

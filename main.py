@@ -120,6 +120,30 @@ with engine.connect() as _conn:
         _conn.execute(text("ALTER TABLE tasks_nn RENAME TO tasks"))
         _conn.commit()
 
+    # Rename aim -> purpose column in functions table
+    fn_cols_now = {row[1] for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
+    if "aim" in fn_cols_now and "purpose" not in fn_cols_now:
+        _conn.execute(text("""
+            CREATE TABLE functions_purpose (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(200) NOT NULL,
+                parent_id INTEGER,
+                description TEXT DEFAULT '',
+                purpose TEXT DEFAULT '',
+                emergency_rep_id INTEGER,
+                created_at DATETIME,
+                organisation_id INTEGER NOT NULL
+            )
+        """))
+        _conn.execute(text(
+            "INSERT INTO functions_purpose "
+            "SELECT id, name, parent_id, description, aim, emergency_rep_id, created_at, organisation_id "
+            "FROM functions"
+        ))
+        _conn.execute(text("DROP TABLE functions"))
+        _conn.execute(text("ALTER TABLE functions_purpose RENAME TO functions"))
+        _conn.commit()
+
 Base.metadata.create_all(bind=engine)
 
 # Seed default org and backfill existing rows
@@ -170,6 +194,16 @@ def switch_organisation(org_id: int, db: Session = Depends(get_db)):
     resp = RedirectResponse("/", status_code=303)
     if org:
         resp.set_cookie("current_org_id", str(org_id))
+    return resp
+
+
+@app.post("/set-language")
+def set_language(lang: str = Form(...), referer: str = Form("/")):
+    from translations import DEFAULT_LANG, SUPPORTED_LANGS
+    if lang not in SUPPORTED_LANGS:
+        lang = DEFAULT_LANG
+    resp = RedirectResponse(referer, status_code=303)
+    resp.set_cookie("lang", lang, max_age=60 * 60 * 24 * 365, samesite="lax")
     return resp
 
 

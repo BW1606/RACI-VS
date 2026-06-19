@@ -8,7 +8,7 @@
       "ref": "f3",
       "name": "Projektmanager",
       "description": "managed projekte",
-      "aim": "XYZ",
+      "purpose":"XYZ",
       "parent_ref": "f6",
       "emergency_rep_ref": null
     },
@@ -16,7 +16,7 @@
       "ref": "f4",
       "name": "Entwickler (Dev)",
       "description": "entwickelt",
-      "aim": "import Claude Code:\r\n'pls fix bug '",
+      "purpose":"import Claude Code:\r\n'pls fix bug '",
       "parent_ref": "f3",
       "emergency_rep_ref": null
     },
@@ -24,7 +24,7 @@
       "ref": "f5",
       "name": "Tester (QA)",
       "description": "Testet QA",
-      "aim": "'all full of bugs'",
+      "purpose":"'all full of bugs'",
       "parent_ref": "f3",
       "emergency_rep_ref": "f4"
     },
@@ -32,7 +32,7 @@
       "ref": "f6",
       "name": "Stakeholder (SH)",
       "description": "Holds Stakes",
-      "aim": "Will geld machen",
+      "purpose":"Will geld machen",
       "parent_ref": null,
       "emergency_rep_ref": null
     }

@@ -13,8 +13,8 @@
       hx-delete="/functions/{{ fn.id }}"
       hx-target="#fn-row-{{ fn.id }}"
       hx-swap="outerHTML"
-      hx-confirm="Delete '{{ fn.name }}'? This also removes all its role assignments.">
-      Delete
+      hx-confirm="{{ t.fn_delete_confirm | replace('%s', fn.name) }}">
+      {{ t.btn_delete }}
     </button>
   </td>
 </tr>
