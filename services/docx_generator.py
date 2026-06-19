@@ -137,17 +137,20 @@ def generate_function_description(fn) -> BytesIO:
     else:
         _add_placeholder(doc)
 
-    # 8. Befugnisse (Signaturverantwortung S)
-    doc.add_heading("8. Befugnisse (Signaturverantwortung S)", level=2)
+    # 8. Signaturverantwortung (S)
+    doc.add_heading("8. Signaturverantwortung (S)", level=2)
     if by_role["S"]:
         for tr in by_role["S"]:
             doc.add_paragraph(tr.task.title, style="List Bullet")
     else:
-        p = doc.add_paragraph(style="List Bullet")
-        p.add_run("Siehe Geschäftsordnung (GO)")
+        _add_placeholder(doc)
 
-    # 9. Vertretung
-    doc.add_heading("9. Vertretung", level=2)
+    # 9. Befugnisse
+    doc.add_heading("9. Befugnisse", level=2)
+    doc.add_paragraph(fn.befugnisse or "—")
+
+    # 10. Vertretung
+    doc.add_heading("10. Vertretung", level=2)
     rep_name = fn.emergency_rep.name if fn.emergency_rep else "Details ergänzen"
     _add_field(doc, "Vertretung von", rep_name)
     p = doc.add_paragraph()

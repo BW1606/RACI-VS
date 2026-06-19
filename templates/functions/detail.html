@@ -21,6 +21,7 @@
     <tr><th>{{ t.fn_hierarchy }}</th><td>{{ hierarchy_path }}</td></tr>
     <tr><th>{{ t.fn_description }}</th><td style="white-space:pre-wrap">{{ fn.description or "—" }}</td></tr>
     <tr><th>{{ t.fn_purpose }}</th><td style="white-space:pre-wrap">{{ fn.purpose or "—" }}</td></tr>
+    <tr><th>{{ t.fn_befugnisse }}</th><td style="white-space:pre-wrap">{{ fn.befugnisse or "—" }}</td></tr>
     <tr><th>{{ t.fn_emergency }}</th><td>
       {% if fn.emergency_rep %}
         <a href="/functions/{{ fn.emergency_rep.id }}">{{ fn.emergency_rep.name }}</a>
@@ -137,6 +138,9 @@
   </label>
   <label>{{ t.fn_purpose }}
     <textarea name="purpose" rows="3">{{ fn.purpose }}</textarea>
+  </label>
+  <label>{{ t.fn_befugnisse }}
+    <textarea name="befugnisse" rows="3" placeholder="{{ t.fn_befugnisse_placeholder }}">{{ fn.befugnisse }}</textarea>
   </label>
   <button type="submit">{{ t.btn_save }}</button>
 </form>

@@ -52,7 +52,9 @@ TRANSLATIONS = {
         "fn_add_heading":        "Add New Function",
         "fn_name_placeholder":   "e.g. Project Manager",
         "fn_desc_placeholder":   "Describe the function…",
-        "fn_purpose_placeholder":"What is the purpose of this function?",
+        "fn_purpose_placeholder":     "What is the purpose of this function?",
+        "fn_befugnisse":              "Befugnisse",
+        "fn_befugnisse_placeholder":  "Describe authorisations…",
         "fn_add_btn":            "Add Function",
         "fn_delete_confirm":     "Delete '%s'? This also removes all its role assignments.",
         # Functions detail page
@@ -150,7 +152,9 @@ TRANSLATIONS = {
         "fn_add_heading":        "Neue Funktion hinzufügen",
         "fn_name_placeholder":   "z.B. Projektmanager",
         "fn_desc_placeholder":   "Funktion beschreiben…",
-        "fn_purpose_placeholder":"Was ist das Ziel dieser Funktion?",
+        "fn_purpose_placeholder":     "Was ist das Ziel dieser Funktion?",
+        "fn_befugnisse":              "Befugnisse",
+        "fn_befugnisse_placeholder":  "Befugnisse beschreiben…",
         "fn_add_btn":            "Funktion hinzufügen",
         "fn_delete_confirm":     "'%s' löschen? Dabei werden auch alle Rollenzuweisungen entfernt.",
         # Functions detail page
