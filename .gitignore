@@ -25,6 +25,9 @@ env/
 .vscode/
 .idea/
 
+CLAUDE.md
+docs/
+
 # OS
 .DS_Store
 Thumbs.db
