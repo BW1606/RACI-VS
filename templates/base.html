@@ -92,6 +92,14 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+  <script>
+    document.addEventListener('click', function(e) {
+      var switcher = document.querySelector('.org-switcher');
+      if (switcher && !switcher.contains(e.target)) {
+        switcher.removeAttribute('open');
+      }
+    });
+  </script>
 
 <dialog id="org-manage-dialog">
   <article>
