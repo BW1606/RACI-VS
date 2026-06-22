@@ -5,15 +5,16 @@
 1. [Installation](#installation)
 2. [Überblick](#überblick)
 3. [Erste Schritte: neue Organisation anlegen](#erste-schritte-neue-organisation-anlegen)
-4. [Organisation importieren](#organisation-importieren)
-5. [Funktionen anlegen und bearbeiten](#funktionen-anlegen-und-bearbeiten)
-6. [Aufgaben anlegen und bearbeiten](#aufgaben-anlegen-und-bearbeiten)
-7. [Rollen zuweisen](#rollen-zuweisen)
-7. [Matrix ansehen](#matrix-ansehen)
-8. [Organigramm](#organigramm)
-9. [Schnittstelle zwischen zwei Funktionen](#schnittstelle-zwischen-zwei-funktionen)
-10. [Dokumente: Vorschau und Download](#dokumente-vorschau-und-download)
-11. [Organisation exportieren](#organisation-exportieren)
+4. [Organisation löschen](#organisation-löschen)
+5. [Organisation importieren](#organisation-importieren)
+6. [Funktionen anlegen und bearbeiten](#funktionen-anlegen-und-bearbeiten)
+7. [Aufgaben anlegen und bearbeiten](#aufgaben-anlegen-und-bearbeiten)
+8. [Rollen zuweisen](#rollen-zuweisen)
+9. [Matrix ansehen](#matrix-ansehen)
+10. [Organigramm](#organigramm)
+11. [Schnittstelle zwischen zwei Funktionen](#schnittstelle-zwischen-zwei-funktionen)
+12. [Dokumente: Vorschau und Download](#dokumente-vorschau-und-download)
+13. [Organisation exportieren](#organisation-exportieren)
 
 ---
 
@@ -53,6 +54,20 @@ Eine Organisation ist ein abgeschlossener Arbeitsbereich mit eigenen Funktionen,
 4. Die neue, leere Organisation wird angelegt und sofort als aktive Organisation gesetzt.
 
 > Die aktive Organisation bestimmt, welche Funktionen, Aufgaben und Matrizen angezeigt werden. Alle Aktionen (Anlegen, Bearbeiten, Löschen) wirken immer nur auf die aktive Organisation.
+
+---
+
+## Organisation löschen
+
+Eine nicht mehr benötigte Organisation kann dauerhaft entfernt werden. Dabei werden alle zugehörigen Funktionen, Aufgaben und Rollenzuweisungen unwiderruflich gelöscht.
+
+1. Klicke oben links auf den **Organisations-Umschalter** (zeigt den Namen der aktuell aktiven Organisation).
+2. Klicke auf den **Namen der aktiven Organisation** (mit dem Häkchen ✓ markiert).
+3. Es öffnet sich das Fenster **Organisationen verwalten**. Darin werden alle angelegten Organisationen aufgelistet.
+4. Klicke bei der zu löschenden Organisation auf **Löschen** und bestätige die Sicherheitsabfrage.
+5. Die Organisation verschwindet sofort aus der Liste.
+
+> **Hinweis:** Die aktuell aktive Organisation (mit ✓ markiert) kann nicht gelöscht werden. Wechsle zuerst in eine andere Organisation, wenn du die aktive löschen möchtest. Ist nur eine einzige Organisation vorhanden, erscheint kein Löschen-Button.
 
 ---
 

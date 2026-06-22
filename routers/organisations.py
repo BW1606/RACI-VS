@@ -2,7 +2,7 @@ import io
 import json
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -234,3 +234,35 @@ async def import_organisation(
     resp = RedirectResponse("/", status_code=303)
     resp.set_cookie("current_org_id", str(new_org.id))
     return resp
+
+
+@router.delete("/{org_id}", response_class=HTMLResponse)
+def delete_organisation(
+    org_id: int,
+    db: Session = Depends(get_db),
+    org_ctx: dict = Depends(get_org_context),
+):
+    current_org_id = org_ctx["current_org_id"]
+
+    if org_id == current_org_id:
+        raise HTTPException(status_code=400, detail="Cannot delete the active organisation")
+
+    total_orgs = db.query(Organisation).count()
+    if total_orgs <= 1:
+        raise HTTPException(status_code=400, detail="Cannot delete the last organisation")
+
+    org = db.get(Organisation, org_id)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organisation not found")
+
+    # Cascade: FunctionTaskRole → Function → Task → Organisation
+    # (SQLite FK enforcement is off; deletion order still matters for ORM state)
+    fn_ids = [row[0] for row in db.query(Function.id).filter(Function.organisation_id == org_id).all()]
+    if fn_ids:
+        db.query(FunctionTaskRole).filter(FunctionTaskRole.function_id.in_(fn_ids)).delete(synchronize_session=False)
+    db.query(Function).filter(Function.organisation_id == org_id).delete(synchronize_session=False)
+    db.query(Task).filter(Task.organisation_id == org_id).delete(synchronize_session=False)
+    db.delete(org)
+    db.commit()
+
+    return HTMLResponse("")

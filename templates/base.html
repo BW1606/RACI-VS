@@ -20,7 +20,10 @@
               {% for org in all_orgs %}
               <li>
                 {% if org.id == current_org.id %}
-                <span class="org-active">&#10003; {{ org.name }}</span>
+                <button type="button" class="org-active org-manage-btn"
+                        onclick="document.getElementById('org-manage-dialog').showModal();document.querySelector('.org-switcher').removeAttribute('open')">
+                  &#10003; {{ org.name }}
+                </button>
                 {% else %}
                 <a href="/organisations/switch/{{ org.id }}">{{ org.name }}</a>
                 {% endif %}
@@ -89,5 +92,52 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+
+<dialog id="org-manage-dialog">
+  <article>
+    <header>
+      <button type="button" aria-label="{{ t.btn_close }}"
+              onclick="document.getElementById('org-manage-dialog').close()"></button>
+      <h3>{{ t.org_manage_title }}</h3>
+    </header>
+    <table>
+      <tbody id="org-manage-tbody">
+        {% for org in all_orgs %}
+        <tr id="org-manage-row-{{ org.id }}">
+          <td>
+            {{ org.name }}
+            {% if org.id == current_org.id %}
+            <small style="color:var(--pico-primary);font-weight:600"> {{ t.org_manage_current }}</small>
+            {% endif %}
+          </td>
+          <td style="text-align:right">
+            {% if org.id != current_org.id %}
+            <button type="button"
+                    class="outline secondary"
+                    style="padding:0.2rem 0.6rem;font-size:0.8rem;margin:0"
+                    hx-delete="/organisations/{{ org.id }}"
+                    hx-target="#org-manage-row-{{ org.id }}"
+                    hx-swap="outerHTML"
+                    hx-confirm="{{ t.org_delete_confirm | replace('%s', org.name) }}">
+              {{ t.btn_delete }}
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <footer>
+      <button type="button" onclick="document.getElementById('org-manage-dialog').close()">
+        {{ t.btn_close }}
+      </button>
+    </footer>
+  </article>
+</dialog>
+<script>
+  document.getElementById('org-manage-dialog').addEventListener('click', function(e) {
+    if (e.target === this) this.close();
+  });
+</script>
 </body>
 </html>
