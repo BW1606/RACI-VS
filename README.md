@@ -4,7 +4,7 @@ A locally-running web app for managing RACI-VS responsibility matrices across co
 
 ## Features
 
-- **Multi-organisation support** — create any number of named organisations; each has its own isolated set of functions, tasks, and assignments. Switch between them from the nav bar; new organisations start completely empty.
+- **Multi-organisation support** — create any number of named organisations; each has its own isolated set of functions, tasks, and assignments. Switch between them from the nav bar; new organisations start completely empty. Click the active organisation name in the nav bar to open the organisation manager, where any inactive organisation (along with all its functions, tasks, and assignments) can be permanently deleted.
 - **Function management** — create functions with company hierarchy, description, purpose, befugnisse (signing authority), and emergency representative
 - **Task management** — create tasks with descriptions and assign functions to them with RACI-VS roles
 - **R-role subcategory** — Responsible (R) assignments carry one of five subcategories (Ausführende Tätigkeit, Gewährleistung, Koordination, Veranlassung, Mitwirkung); visible in the function document, not in the matrix
@@ -96,6 +96,10 @@ Go to **Organisation** in the navigation bar. Functions are displayed as a top-d
 ### 6. Interface Between Two Functions
 
 Go to **Interface**, select two functions, and click **Show Interface**. The page displays every task both functions are involved in, with their respective roles side by side.
+
+## Organisation Management
+
+Click the **active organisation name** (shown with ✓ in the nav-bar dropdown) to open the **organisation manager** dialog. The dialog lists all organisations. Any organisation that is not currently active can be deleted — this permanently removes the organisation together with all its functions, tasks, and role assignments. The currently active organisation cannot be deleted; switch to a different organisation first if you need to remove it.
 
 ## Organisation Export & Import
 

@@ -13,6 +13,10 @@ TRANSLATIONS = {
         "org_new_placeholder": "New organisation…",
         "org_export":          "↓ Export current org",
         "org_import":          "↑ Import org (.json)",
+        "org_manage_title":    "Manage Organisations",
+        "org_manage_current":  "(active)",
+        "org_delete_confirm":  "Delete '%s'? All its functions, tasks, and assignments will be permanently removed.",
+        "btn_close":           "Close",
         # Shared UI
         "select_placeholder":  "— select —",
         "none_placeholder":    "— none —",
@@ -113,6 +117,10 @@ TRANSLATIONS = {
         "org_new_placeholder": "Neue Organisation…",
         "org_export":          "↓ Aktuelle Organisation exportieren",
         "org_import":          "↑ Organisation importieren (.json)",
+        "org_manage_title":    "Organisationen verwalten",
+        "org_manage_current":  "(aktiv)",
+        "org_delete_confirm":  "'%s' löschen? Alle zugehörigen Funktionen, Aufgaben und Zuweisungen werden dauerhaft entfernt.",
+        "btn_close":           "Schließen",
         # Shared UI
         "select_placeholder":  "— auswählen —",
         "none_placeholder":    "— keine —",

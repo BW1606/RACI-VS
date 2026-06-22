@@ -227,3 +227,34 @@ details summary {
   height: 1.2rem;
   background: var(--pico-muted-border-color);
 }
+
+/* Org manage button — resets PicoCSS button styles to match the old .org-active span */
+button.org-manage-btn {
+  background: none;
+  border: none;
+  padding: 0.3rem 0.2rem;
+  margin: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--pico-primary);
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  text-align: left;
+  box-shadow: none;
+}
+
+button.org-manage-btn:hover {
+  text-decoration: underline;
+  background: none;
+}
+
+/* Org manage dialog sizing */
+#org-manage-dialog article {
+  max-width: 480px;
+  width: 90vw;
+}
+
+#org-manage-dialog table {
+  margin-bottom: 0;
+}
