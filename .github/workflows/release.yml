@@ -27,32 +27,12 @@ jobs:
         shell: cmd
 
       - name: Install WiX Toolset
-        shell: pwsh
         run: |
-          choco install wixtoolset --yes --no-progress
-          $ec = $LASTEXITCODE
-          # 103 / 3010 = "reboot required" — WiX is installed, runner won't reboot
-          if ($ec -ne 0 -and $ec -ne 103 -and $ec -ne 3010) { exit $ec }
-          $wixBin = Get-ChildItem 'C:\Program Files (x86)\WiX Toolset*\bin' |
-                    Sort-Object Name -Descending |
-                    Select-Object -First 1 -ExpandProperty FullName
-          Add-Content $env:GITHUB_PATH $wixBin
+          dotnet tool install --global wix
+          wix extension add WixToolset.UI.wixext
 
-      - name: Harvest app files
-        run: heat dir dist\RACI-VS -cg ApplicationFiles -dr INSTALLDIR -scom -srd -sfrag -sreg -gg -out dist_files.wxs
-        shell: cmd
-
-      - name: Compile WiX sources
-        run: |
-          mkdir build
-          candle raci_vs.wxs dist_files.wxs -out build\
-        shell: cmd
-
-      - name: Link MSI
-        run: |
-          mkdir Output
-          light build\raci_vs.wixobj build\dist_files.wixobj -ext WixUIExtension -cultures:en-US -o Output\RACI-VS_Setup.msi
-        shell: cmd
+      - name: Build MSI
+        run: wix build raci_vs.wxs -ext WixToolset.UI.wixext -arch x64 -o Output\RACI-VS_Setup.msi
 
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
