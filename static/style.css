@@ -120,9 +120,11 @@ details summary {
 }
 
 .org-switcher > ul > li a,
-.org-switcher > ul > li span {
+.org-switcher > ul > li span,
+.org-switcher > ul > li label {
   display: block;
   padding: 0.3rem 0.2rem;
+  margin: 0 !important;
 }
 
 .org-active {
