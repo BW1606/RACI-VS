@@ -38,19 +38,21 @@
               </li>
               <li><hr style="margin:0.4rem 0" /></li>
               <li>
-                <a href="/organisations/export" style="display:block;padding:0.2rem 0">
+                <a href="/organisations/export" style="display:block;padding:0.2rem 0;font-size:0.85rem">
                   {{ t.org_export }}
                 </a>
               </li>
+              <li><hr style="margin:0.4rem 0" /></li>
               <li>
                 <form method="post" action="/organisations/import"
                       enctype="multipart/form-data"
-                      class="org-import-form">
-                  <label style="font-size:0.85rem;margin:0">
+                      class="org-import-form"
+                      style="margin:0;padding:0">
+                  <label style="font-size:0.85rem;margin:0;cursor:pointer;display:block;padding:0.2rem 0;color:var(--pico-primary)">
                     {{ t.org_import }}
                     <input type="file" name="file" accept=".json" required
                            onchange="this.form.submit()"
-                           style="margin-top:0.2rem;font-size:0.8rem" />
+                           style="display:none" />
                   </label>
                 </form>
               </li>

@@ -11,8 +11,8 @@ TRANSLATIONS = {
         "nav_organisation": "Organisation",
         # Org switcher (base.html)
         "org_new_placeholder": "New organisation…",
-        "org_export":          "↓ Export current org",
-        "org_import":          "↑ Import org (.json)",
+        "org_export":          "↓ Export org",
+        "org_import":          "↑ Import org",
         "org_manage_title":    "Manage Organisations",
         "org_manage_current":  "(active)",
         "org_delete_confirm":  "Delete '%s'? All its functions, tasks, and assignments will be permanently removed.",
@@ -120,8 +120,8 @@ TRANSLATIONS = {
         "nav_organisation": "Organisation",
         # Org switcher (base.html)
         "org_new_placeholder": "Neue Organisation…",
-        "org_export":          "↓ Aktuelle Organisation exportieren",
-        "org_import":          "↑ Organisation importieren (.json)",
+        "org_export":          "↓ Organisation exportieren",
+        "org_import":          "↑ Organisation importieren",
         "org_manage_title":    "Organisationen verwalten",
         "org_manage_current":  "(aktiv)",
         "org_delete_confirm":  "'%s' löschen? Alle zugehörigen Funktionen, Aufgaben und Zuweisungen werden dauerhaft entfernt.",
