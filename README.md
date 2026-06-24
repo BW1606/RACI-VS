@@ -36,7 +36,7 @@ No Node.js required.
 
 ### End users — Windows desktop app
 
-Download `RACI-VS_Setup.exe` from the [Releases page](https://github.com/BW1606/RACI-VS/releases) and run it. The installer creates a Start Menu entry and an optional Desktop shortcut. No Python or command-line tools needed.
+Download `RACI-VS_Setup.msi` from the [Releases page](https://github.com/BW1606/RACI-VS/releases) and run it. The installer creates a Start Menu entry and a Desktop shortcut. No Python or command-line tools needed.
 
 Launch the app from the Desktop shortcut or Start Menu. A tray icon appears in the Windows taskbar notification area and the browser opens automatically to the app. Right-click the tray icon for **Open RACI-VS** and **Quit** options.
 
@@ -64,19 +64,18 @@ Open [http://localhost:8000](http://localhost:8000) in your browser.
 
 ## Building the Installer
 
-To produce a distributable `RACI-VS_Setup.exe`, you need Python 3.11+, the project dependencies, and [Inno Setup](https://jrsoftware.org/isinfo.php) installed on your build machine.
+To produce a distributable `RACI-VS_Setup.msi`, push a `v*.*.*` tag to trigger the GitHub Actions workflow — it handles everything automatically.
 
-**Step 1 — bundle the app with PyInstaller:**
+**Step 1 — bundle the app with PyInstaller** (local build / smoke-test):
 ```bat
 build.bat
 ```
 Output: `dist\RACI-VS\` folder containing `RACI-VS.exe` and all dependencies.
 
-**Step 2 — compile the installer:**
-Open [raci_vs.iss](raci_vs.iss) in Inno Setup Compiler and click **Build → Compile**.
-Output: `RACI-VS_Setup.exe` — a self-contained Windows installer ready to distribute.
+**Step 2 — compile the installer (CI only):**
+Push a tag (e.g. `git tag v1.0.9 && git push origin v1.0.9`). GitHub Actions installs WiX Toolset, harvests the `dist\RACI-VS\` directory, and produces `RACI-VS_Setup.msi`, which is attached automatically to the GitHub Release.
 
-> **SmartScreen warning:** because the `.exe` is not code-signed, Windows may show a *"Windows protected your PC"* prompt on first run. Click **More info → Run anyway** to proceed. This is expected for unsigned software distributed outside the Microsoft Store.
+> **SmartScreen warning:** because the `.msi` is not code-signed, Windows may show a *"Windows protected your PC"* prompt on first run. Click **More info → Run anyway** to proceed. This is expected for unsigned software distributed outside the Microsoft Store.
 
 ## Usage
 
@@ -214,7 +213,7 @@ RACI-VS/
 ├── schemas.py                # Pydantic validation schemas
 ├── requirements.txt
 ├── build.bat                 # PyInstaller build script → dist\RACI-VS\RACI-VS.exe
-├── raci_vs.iss               # Inno Setup script → RACI-VS_Setup.exe installer
+├── raci_vs.wxs               # WiX v3 installer script → RACI-VS_Setup.msi installer
 ├── routers/
 │   ├── functions.py          # Function CRUD endpoints (org-scoped)
 │   ├── tasks.py              # Task CRUD endpoints (org-scoped)

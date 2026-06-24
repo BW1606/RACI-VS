@@ -16,7 +16,7 @@ if %ERRORLEVEL% == 0 (
     echo Build successful.
     echo Output: dist\RACI-VS\RACI-VS.exe
     echo.
-    echo To create the Setup.exe installer, open raci_vs.iss in Inno Setup Compiler.
+    echo To create the Setup.msi installer, push a v*.*.* tag to trigger the GitHub Actions workflow.
 ) else (
     echo Build failed. Check the output above for errors.
 )

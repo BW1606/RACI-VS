@@ -26,15 +26,27 @@ jobs:
         run: build.bat
         shell: cmd
 
-      - name: Install Inno Setup
-        run: choco install innosetup --yes --no-progress
+      - name: Install WiX Toolset
+        run: choco install wixtoolset --yes --no-progress
 
-      - name: Compile installer
-        run: iscc raci_vs.iss
+      - name: Harvest app files
+        run: heat dir dist\RACI-VS -cg ApplicationFiles -dr INSTALLDIR -scom -srd -sfrag -sreg -gg -out dist_files.wxs
+        shell: cmd
+
+      - name: Compile WiX sources
+        run: |
+          mkdir build
+          candle raci_vs.wxs dist_files.wxs -out build\
+        shell: cmd
+
+      - name: Link MSI
+        run: |
+          mkdir Output
+          light build\raci_vs.wixobj build\dist_files.wixobj -ext WixUIExtension -cultures:en-US -o Output\RACI-VS_Setup.msi
         shell: cmd
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Output\RACI-VS_Setup.exe
+          files: Output\RACI-VS_Setup.msi
           generate_release_notes: true

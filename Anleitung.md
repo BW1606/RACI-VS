@@ -22,7 +22,7 @@
 
 Die App läuft vollständig ohne Python-Installation oder Terminal.
 
-1. **Installer ausführen** — starte `RACI-VS_Setup.exe`. Windows zeigt möglicherweise eine **SmartScreen-Warnung** ("Windows hat den PC geschützt"), weil die App nicht mit einem kommerziellen Zertifikat signiert ist. Klicke in diesem Fall auf **Weitere Informationen** und dann auf **Trotzdem ausführen**. Danach folge dem Installationsassistenten. Die App wird standardmäßig im Benutzerverzeichnis installiert; Administratorrechte sind nicht erforderlich. Optional kann beim Setup eine Desktop-Verknüpfung erstellt werden.
+1. **Installer ausführen** — starte `RACI-VS_Setup.msi`. Windows zeigt möglicherweise eine **SmartScreen-Warnung** ("Windows hat den PC geschützt"), weil die App nicht mit einem kommerziellen Zertifikat signiert ist. Klicke in diesem Fall auf **Weitere Informationen** und dann auf **Trotzdem ausführen**. Danach folge dem Installationsassistenten. Die App wird standardmäßig im Benutzerverzeichnis installiert; Administratorrechte sind nicht erforderlich.
 
 2. **App starten** — öffne **RACI-VS Manager** über das Startmenü oder die Desktop-Verknüpfung. Der Server startet automatisch im Hintergrund und der Browser öffnet sich auf `http://127.0.0.1:8000`.
 
