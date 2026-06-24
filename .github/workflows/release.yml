@@ -27,7 +27,16 @@ jobs:
         shell: cmd
 
       - name: Install WiX Toolset
-        run: choco install wixtoolset --yes --no-progress
+        shell: pwsh
+        run: |
+          choco install wixtoolset --yes --no-progress
+          $ec = $LASTEXITCODE
+          # 103 / 3010 = "reboot required" — WiX is installed, runner won't reboot
+          if ($ec -ne 0 -and $ec -ne 103 -and $ec -ne 3010) { exit $ec }
+          $wixBin = Get-ChildItem 'C:\Program Files (x86)\WiX Toolset*\bin' |
+                    Sort-Object Name -Descending |
+                    Select-Object -First 1 -ExpandProperty FullName
+          Add-Content $env:GITHUB_PATH $wixBin
 
       - name: Harvest app files
         run: heat dir dist\RACI-VS -cg ApplicationFiles -dr INSTALLDIR -scom -srd -sfrag -sreg -gg -out dist_files.wxs
