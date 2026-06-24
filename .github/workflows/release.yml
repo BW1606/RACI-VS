@@ -45,7 +45,14 @@ jobs:
           light build\raci_vs.wixobj build\dist_files.wixobj -ext WixUIExtension -cultures:en-US -o Output\RACI-VS_Setup.msi
         shell: cmd
 
+      - name: Upload MSI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RACI-VS_Setup
+          path: Output\RACI-VS_Setup.msi
+
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: Output\RACI-VS_Setup.msi
