@@ -109,7 +109,7 @@ details summary {
   border-radius: var(--pico-border-radius);
   padding: 0.4rem 0;
   width: max-content;
-  min-width: 160px !important;
+  max-width: 160px;
   list-style: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
