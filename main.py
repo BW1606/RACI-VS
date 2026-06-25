@@ -144,11 +144,12 @@ with engine.connect() as _conn:
         _conn.execute(text("ALTER TABLE functions_purpose RENAME TO functions"))
         _conn.commit()
 
-    # Add befugnisse column to functions table
-    fn_cols_befugnisse = {row[1] for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
-    if "befugnisse" not in fn_cols_befugnisse:
-        _conn.execute(text("ALTER TABLE functions ADD COLUMN befugnisse TEXT DEFAULT ''"))
-        _conn.commit()
+    # Add befugnisse column to functions table (skipped on fresh install – create_all handles it)
+    if _conn.execute(text("SELECT 1 FROM sqlite_master WHERE type='table' AND name='functions'")).fetchone():
+        fn_cols_befugnisse = {row[1] for row in _conn.execute(text("PRAGMA table_info(functions)")).fetchall()}
+        if "befugnisse" not in fn_cols_befugnisse:
+            _conn.execute(text("ALTER TABLE functions ADD COLUMN befugnisse TEXT DEFAULT ''"))
+            _conn.commit()
 
 Base.metadata.create_all(bind=engine)
 
