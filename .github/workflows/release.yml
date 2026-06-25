@@ -31,8 +31,8 @@ jobs:
           dotnet tool install --global wix --version 4.0.5
           wix extension add WixToolset.UI.wixext/4.0.5
 
-      - name: Harvest app files
-        run: wix harvest dir dist\RACI-VS -dr INSTALLDIR -cg AppFiles -nologo -o AppFiles.wxs
+      - name: Generate AppFiles.wxs
+        run: pwsh generate_appfiles_wxs.ps1
 
       - name: Build MSI
         run: |
