@@ -31,11 +31,6 @@
       <Directory Id="INSTALLDIR" Name="RACI-VS Manager" />
     </StandardDirectory>
 
-    <!-- Harvest all files from PyInstaller output; preserves subdirectory structure -->
-    <ComponentGroup Id="AppFiles" Directory="INSTALLDIR">
-      <Files Source="dist\RACI-VS\**" />
-    </ComponentGroup>
-
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="ProgramMenuDir" Name="RACI-VS Manager">
         <Component Id="StartMenuShortcut">
