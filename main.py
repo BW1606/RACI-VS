@@ -15,10 +15,7 @@ from database import Base, engine, get_db
 from translations import TRANSLATIONS, SUPPORTED_LANGS, DEFAULT_LANG
 
 
-def resource_path(relative: str) -> str:
-    """Resolve a path to a bundled asset, works both in source and PyInstaller."""
-    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base, relative)
+from utils import resource_path
 from dependencies import get_org_context
 from routers import assignments, documents, functions, organisations, tasks
 from routers.documents import get_shared_tasks

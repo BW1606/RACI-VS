@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 from database import get_db
 from dependencies import get_org_context
 from models import Function, FunctionTaskRole, validate_role
+from utils import resource_path
 
 router = APIRouter(prefix="/assignments", tags=["assignments"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=resource_path("templates"))
 
 
 @router.post("", response_class=HTMLResponse)

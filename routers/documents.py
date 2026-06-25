@@ -13,9 +13,10 @@ from services.docx_generator import (
     generate_interface_description,
     generate_task_description,
 )
+from utils import resource_path
 
 router = APIRouter(prefix="/docs", tags=["documents"])
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=resource_path("templates"))
 
 _MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
