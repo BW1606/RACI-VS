@@ -69,4 +69,4 @@ $script:xml.Add('  </Fragment>')
 $script:xml.Add('</Wix>')
 
 [System.IO.File]::WriteAllLines($Output, $script:xml)
-Write-Host "Generated $Output: $($allFiles.Count) files across $($allDirs.Count) directories"
+Write-Host "Generated ${Output}: $($allFiles.Count) files across $($allDirs.Count) directories"
