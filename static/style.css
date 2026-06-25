@@ -151,6 +151,8 @@ details summary {
   margin: 0;
   padding: 0.25rem 0.6rem;
   font-size: 0.85rem;
+  flex: 0 0 auto;
+  width: auto;
 }
 
 /* Org chart */
